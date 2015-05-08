@@ -17,7 +17,7 @@ Run sample level and/or variant level qc on genomes in BigQuery.
 #### remove_variants.py
 Remove samples and/or variants provided in a file from a Google Genomics dataset.
 
-#### Config.py
+#### config.py
 Settings for access to Google Cloud. Both credentials and dataset information are stored here.
 
 #### GenomicsQueries.py
