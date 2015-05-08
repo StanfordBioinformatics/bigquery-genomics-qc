@@ -180,6 +180,8 @@ class GenomicsQC(object):
 
     # Add failed samples to total
     def collect_failed_samples(self, result, query):
+        if result is None:
+            return
         for r in result:
             sample_id = r['sample_id']
             if sample_id in self.failed_samples:
@@ -189,6 +191,8 @@ class GenomicsQC(object):
 
     # Add failed positions to total
     def collect_failed_positions(self, result, query):
+        if result is None:
+            return
         for r in result:
             position = "/".join([r['reference_name'], r['start'], r['end']])
             if position in self.failed_positions:
@@ -198,6 +202,8 @@ class GenomicsQC(object):
 
     # Add failed sample calls to total
     def collect_failed_sample_calls(self, result, query):
+        if result is None:
+            return
         for r in result:
             position = "/".join([r['sample_id'], r['reference_name'], r['start'], r['end']])
             if position in self.failed_sample_calls:

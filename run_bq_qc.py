@@ -18,21 +18,21 @@ def parse_command_line():
                       'will be removed from the variantset.  Sample level qc and variant level qc can be run at the '
                       'same time.  See config.py to set dataset and table names.')
 
-    parser.add_argument("--sample_qc", default=False,
+    parser.add_argument("--sample_qc", action='store_true', default=False,
                                 help="Run sample level qc.")
-    parser.add_argument("--variant_qc", default=False,
+    parser.add_argument("--variant_qc", action='store_true', default=False,
                                 help="Run variant level qc.")
-    parser.add_argument("--variant_table", type=string, default=None,
+    parser.add_argument("--variant_table", default=None,
                                 help="OPTIONAL. Variant table to query. Defaults to value in config.py")
-    parser.add_argument("--expanded_table", type=string, default=None,
+    parser.add_argument("--expanded_table", default=None,
                                 help="OPTIONAL. Expanded variant table to query. Defaults to value in config.py")
-    parser.add_argument("--project_number", type=string, default=None,
+    parser.add_argument("--project_number", default=None,
                                 help="OPTIONAL. Google Cloud project number. Defaults to value in config.py")
-    parser.add_argument("--dataset", type=string, default=None,
+    parser.add_argument("--dataset", default=None,
                                 help="OPTIONAL. Variant store dataset. Defaults to value in config.py")
     parser.add_argument("--client_secrets", default=None,
                                 help="OPTIONAL. client_secrets.json. Defaults to value in config.py")
-    parser.add_argument("--verbose", default=False,
+    parser.add_argument("--verbose", action='store_true', default=False,
                                 help="OPTIONAL. Logs will be very detailed.")
 
     options = parser.parse_args()

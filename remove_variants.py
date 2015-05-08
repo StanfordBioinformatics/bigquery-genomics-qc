@@ -20,23 +20,23 @@ def parse_command_line():
     parser = argparse.ArgumentParser(
         description = 'This script removes ')
 
-    parser.add_argument("--sample_id", type=string, default=None,
+    parser.add_argument("--sample_id", default=None,
                                 help="Sample name to remove from dataset. To remove multiple samples use --sample_file")
-    parser.add_argument("--sample_file", type=string, default=None,
+    parser.add_argument("--sample_file", default=None,
                                 help="File containing list of sample names to remove from dataset. One per line")
-    parser.add_argument("--variant_file", type=string, default=None,
+    parser.add_argument("--variant_file", default=None,
                                 help="File containing list of positions to remove from dataset. BED format required.")
-    parser.add_argument("--variant_table", type=string, default=None,
+    parser.add_argument("--variant_table", default=None,
                                 help="OPTIONAL. Variant table to query. Defaults to value in config.py")
-    parser.add_argument("--expanded_table", type=string, default=None,
+    parser.add_argument("--expanded_table", default=None,
                                 help="OPTIONAL. Expanded variant table to query. Defaults to value in config.py")
-    parser.add_argument("--project_number", type=string, default=None,
+    parser.add_argument("--project_number", default=None,
                                 help="OPTIONAL. Google Cloud project number. Defaults to value in config.py")
-    parser.add_argument("--dataset", type=string, default=None,
+    parser.add_argument("--dataset", default=None,
                                 help="OPTIONAL. Variant store dataset. Defaults to value in config.py")
     parser.add_argument("--client_secrets", default=None,
                                 help="OPTIONAL. client_secrets.json. Defaults to value in config.py")
-    parser.add_argument("--verbose", default=False,
+    parser.add_argument("--verbose", action='store_true', default=False,
                                 help="OPTIONAL. Logs will be very detailed.")
 
     options = parser.parse_args()
