@@ -1,0 +1,7 @@
+bigquery_credentials.dat
+credentials.dat
+BigQueryClient.pyc
+BigQueryGenomicsQC.pyc
+GenomicsQueries.pyc
+GoogleGenomicsClient.pyc
+config.pyc
