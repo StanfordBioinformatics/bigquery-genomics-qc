@@ -7,6 +7,7 @@ from oauth2client import tools
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow
+import logging
 
 class GoogleGenomicsClient(object):
     def __init__(self, client_secrets, project_number, dataset):
@@ -47,24 +48,55 @@ class GoogleGenomicsClient(object):
 
     def list_datasets(self):
         request = self.service.datasets().list(projectNumber=self.project_number)
-        response = request.execute()
+        response = self.execute(request)
         return response
 
     def get_call_set_id(self, call_set_name):
         request = self.service.callsets().search(
-            body={'variantSetIds': [self.dataset], 'name': sample_name}
+            body={'variantSetIds': [self.dataset], 'name': call_set_name}
         )
-        response = request.execute()
-        for field in response["callSets"]:
-            return field["id"]
+        response = self.execute(request)
+        if "callSets" in response:
+            for field in response["callSets"]:
+                return field["id"]
         return None
 
     def delete_call_set(self, call_set_id):
-        return None
+        print "Deleting sample %s" % call_set_id
+        # todo: not executing until testing is complete
+        #request = self.service.callsets().delete(
+        #    callSetId=call_set_id
+        #)
+        #response = self.execute(request)
+        #print response
 
     def get_variant_id(self, reference_name, start, end):
+        request = self.service.variants().search(
+            body={'variantSetIds': [self.dataset],
+                  'referenceName': reference_name,
+                  'start': start,
+                  'end': end}
+        )
+        response = self.execute(request)
+        if "variants" in response:
+            for field in response["variants"]:
+                return field["id"]
         return None
 
     def delete_variant(self, variant_id):
-        return None
+        # todo: not executing until testing is complete
+        print "Deleting variant %s" % variant_id
+        return None # todo turn turn this off
+        #request = self.service.variants().delete(
+        #    variantId=variant_id
+        #)
+        #response = self.execute(request)
+        #print response
+
+    def execute(self, request):
+        try:
+            response = request.execute()
+            return response
+        except Exception as e:
+            logging.error("Request failed: %s" % e)
 

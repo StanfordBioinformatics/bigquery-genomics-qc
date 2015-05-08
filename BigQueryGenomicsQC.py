@@ -1,6 +1,5 @@
 import os
 import sys
-import re
 from GenomicsQueries import Queries
 from BigQueryClient import BigQuery
 from config import Config
@@ -8,14 +7,45 @@ from GoogleGenomicsClient import GoogleGenomicsClient
 import logging
 
 class GenomicsQC(object):
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, client_secrets=None, project_number=None, dataset=None, variant_table=None,
+                 expanded_table=None):
+
         self.query_repo = Config.QUERY_REPO
-        self.variant_table = Config.VARIANT_TABLE
-        self.expanded_table = Config.EXPANDED_TABLE
-        self.client_secrets_path = Config.CLIENT_SECRETS
-        self.project_number = Config.PROJECT_NUMBER
+        if variant_table is None:
+            variant_table = Config.VARIANT_TABLE
+        self.variant_table = variant_table
+
+        if expanded_table is None:
+            expanded_table = Config.EXPANDED_TABLE
+        self.expanded_table = expanded_table
+
+        if client_secrets is None:
+            client_secrets = Config.CLIENT_SECRETS
+        self.client_secrets_path = client_secrets
+
+        if project_number is None:
+            project_number = Config.PROJECT_NUMBER
+        self.project_number = project_number
+
+        if dataset is None:
+            dataset = Config.DATASET
+        self.dataset = dataset
+
+        # Set up logging
         self.setup_log(verbose)
-        self.bq = BigQuery(project_number=self.project_number, client_secrets=self.client_secrets_path)
+
+        # Set up API clients
+        self.bq = BigQuery(project_number=self.project_number,
+                           client_secrets=self.client_secrets_path)
+
+        self.gg = GoogleGenomicsClient(client_secrets=self.client_secrets_path,
+                                       project_number=self.project_number,
+                                       dataset=self.dataset)
+
+        # Empty dictionaries for failures
+        self.failed_samples = {}
+        self.failed_positions = {}
+        self.failed_sample_calls = {}
 
     #### Specific types of QC functions ####
     # Sample level QC
@@ -24,7 +54,9 @@ class GenomicsQC(object):
         queries = Queries.SAMPLE_LEVEL_QC_QUERIES
         for q in queries:
             logging.debug(q)
-            self.run_analysis(query_file=q, level='sample')
+            result = self.run_analysis(query_file=q, level='sample')
+            self.collect_failed_samples(result, q)
+        self.remove_failed_samples(self.failed_samples)
 
     # Variant level QC
     def variant_qc(self):
@@ -32,7 +64,14 @@ class GenomicsQC(object):
         queries = Queries.VARIANT_LEVEL_QC_QUERIES
         for q in queries:
             logging.debug(q)
-            self.run_analysis(query_file=q, level='variant')
+            failed = self.run_analysis(query_file=q, level='variant')
+            # Determine if entire position needs to be removed or remove call for a specific sample
+            if Queries.VARIANT_LEVEL_REMOVAL[q] == 'sample_call':
+                self.collect_failed_sample_calls(result, query)
+            elif Queries.VARIANT_LEVEL_REMOVAL[q] == 'position':
+                self.collect_failed_positions(result, query)
+        self.remove_failed_sample_calls(self.failed_sample_calls)
+        self.remove_failed_positions(self.failed_positions)
 
     # Run all required analysis for each query
     def run_analysis(self, query_file, level):
@@ -43,12 +82,7 @@ class GenomicsQC(object):
             cutoffs = self.average_stddev_cutoffs(prequery)
         query = self.prepare_query(query_file, preset_cutoffs=cutoffs)
         result = self.bq.run(query)
-        failed = []
-        if level == 'sample':
-            failed = self.get_failed_samples(result)
-        elif level == 'variant':
-            failed = []
-        return failed
+        return result
 
     #### Query set up ####
     # Set up the query, read it in, apply substitutions
@@ -120,6 +154,7 @@ class GenomicsQC(object):
         }
         return dict
 
+    #### Functions to accumulate failures ####
     # Get failed sample ids
     def get_failed_samples(self, result):
         if result:
@@ -141,6 +176,96 @@ class GenomicsQC(object):
                 }
                 failed_positions.append(position)
             return failed_positions
+        return None
+
+    # Add failed samples to total
+    def collect_failed_samples(self, result, query):
+        for r in result:
+            sample_id = r['sample_id']
+            if sample_id in self.failed_samples:
+                self.failed_samples[sample_id].append(query)
+            else:
+                self.failed_samples[sample_id] = [query]
+
+    # Add failed positions to total
+    def collect_failed_positions(self, result, query):
+        for r in result:
+            position = "/".join([r['reference_name'], r['start'], r['end']])
+            if position in self.failed_positions:
+                self.failed_positions[position].append(query)
+            else:
+                self.failed_positions[position] = [query]
+
+    # Add failed sample calls to total
+    def collect_failed_sample_calls(self, result, query):
+        for r in result:
+            position = "/".join([r['sample_id'], r['reference_name'], r['start'], r['end']])
+            if position in self.failed_sample_calls:
+                self.failed_sample_calls[position].append(query)
+            else:
+                self.failed_sample_calls[position] = [query]
+
+    #### Functions for removing based on provided files ####
+    def remove_samples_from_file(self, file):
+        samples = self.sample_file_to_dict(file)
+        self.remove_failed_samples(samples)
+
+    def remove_positions_from_file(self, file):
+        positions = self.position_file_to_dict(file)
+        self.remove_failed_positions(positions)
+
+    # Accumulate samples from file for removal
+    def sample_file_to_dict(self, file):
+        samples = {}
+        for line in open(file) :
+            samples[line.rstrip('\n')] = ''
+        return samples
+
+    # Accumulate positions from file for removal
+    def position_file_to_dict(self, file):
+        positions = {}
+        for line in open(file) :
+            p = re.sub(r'\t', "/", line.rstrip('\n'))
+            positions[p] = ''
+        return positions
+
+    #### Functions to remove each type of failure ####
+    # Remove samples from variant set given a dictionary of samples.  sample_id is dictionary key
+    def remove_failed_samples(self, failed):
+        for s in failed:
+            self.remove_sample(s)
+
+    # Remove positions from variant set given a dictionary of positions.  position is dictionary key
+    def remove_failed_positions(self, failed):
+        for p in failed:
+            reference_name, start, end = p.split("/")
+            self.remove_variant(reference_name, start, end)
+
+    # Remove sample calls from variant set given a dictionary of sample positions.  sample-call is dictionary key
+    def remove_failed_sample_calls(self, failed):
+        for p in failed:
+            sample_id, reference_name, start, end = p.split("/")
+            self.remove_sample_call(sample_id, reference_name, start, end)
+
+    #### Google Genomics functions ####
+    # Remove a single sample from a variant set
+    def remove_sample(self, sample_id):
+        call_set_id = self.gg.get_call_set_id(sample_id)
+        if call_set_id is None:
+            logging.warn("Failed to retrieve call set id for %s." % sample_id)
+            return None
+        self.gg.delete_call_set(call_set_id)
+
+    # Remove an entire position from a variant set
+    def remove_variant(self, reference_name, start, end):
+        variant_id = self.gg.get_variant_id(reference_name=reference_name, start=start, end=end)
+        if variant_id is None:
+            logging.warn("Failed to retrieve variant id for %s %s %s" % (reference_name, start, end))
+        self.gg.delete_variant(variant_id)
+
+    # Remove a variant of a specific call from a variant set
+    def remove_sample_call(self, sample_id, reference_name, start, end):
+        # todo
         return None
 
     #### Miscellaneous functions ####

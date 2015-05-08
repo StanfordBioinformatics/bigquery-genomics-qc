@@ -3,6 +3,7 @@ from apiclient.discovery import build
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client import tools
+import logging
 
 class BigQueryClient(object):
     def __init__(self, client_secrets):
@@ -41,8 +42,11 @@ class BigQuery(object):
     def execute_query(self, query):
         query_dict = {'query': query, 'timeoutMs': 600000}
         query_request = self.service.jobs()
-        query_response = query_request.query(projectId=self.project_number, body=query_dict).execute()
-        return query_response
+        try:
+            query_response = query_request.query(projectId=self.project_number, body=query_dict).execute()
+            return query_response
+        except Exception as e:
+            logging.error("Unable to execute query: %s" % e)
 
     # Parse BigQuery response into list of dictionaries
     def parse_bq_response(self, response):
