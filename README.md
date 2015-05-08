@@ -19,7 +19,7 @@ Remove samples and/or variants provided in a file from a Google Genomics dataset
 Settings for access to Google Cloud. Both credentials and dataset information are stored here.
 
 #### GenomicsQueries.py
-Query configuration file.  Preset cutoff information is also stored in this file for. 
+Query configuration file.  Preset cutoff information is also stored in this file. 
 
 #### BigQueryGenomicsQC.py
 Class storing the majority of qc functions.
