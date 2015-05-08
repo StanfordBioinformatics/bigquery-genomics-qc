@@ -35,7 +35,7 @@ class BigQuery(object):
         logging.debug("Querying BigQuery")
         response = self.execute_query(query)
         if self.check_response(response) is False:
-            return None
+            return False
         result = self.parse_bq_response(response)
         return result
 
@@ -82,4 +82,7 @@ class BigQuery(object):
         if 'jobComplete' in response:
             if response['jobComplete'] is True:
                 return True
-        raise False
+            else:
+                logging.error("Query timed out")
+                exit(0)
+        return False
