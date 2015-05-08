@@ -32,6 +32,7 @@ class BigQuery(object):
         self.project_number = project_number
 
     def run(self, query):
+        logging.debug("Querying BigQuery")
         response = self.execute_query(query)
         if self.check_response(response) is False:
             return None
@@ -39,6 +40,7 @@ class BigQuery(object):
         return result
 
     # Run a query on BigQuery
+    # todo allow for large resonse
     def execute_query(self, query):
         query_dict = {'query': query, 'timeoutMs': 600000}
         query_request = self.service.jobs()

@@ -37,7 +37,8 @@ def parse_command_line():
     parser.add_argument("--client_secrets", default=None,
                                 help="OPTIONAL. client_secrets.json. Defaults to value in config.py")
     parser.add_argument("--verbose", action='store_true', default=False,
-                                help="OPTIONAL. Logs will be very detailed.")
+                                help="OPTIONAL. Logs will be very detailed. Kind of noise regardless thanks to Google"
+                                     "API Client.")
 
     options = parser.parse_args()
     if options.sample_id is None and options.sample_file is None and options.variant_file is None:

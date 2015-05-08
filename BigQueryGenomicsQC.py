@@ -5,11 +5,13 @@ from BigQueryClient import BigQuery
 from config import Config
 from GoogleGenomicsClient import GoogleGenomicsClient
 import logging
+import time
 
 class GenomicsQC(object):
     def __init__(self, verbose=False, client_secrets=None, project_number=None, dataset=None, variant_table=None,
                  expanded_table=None):
 
+        # Set global variables
         self.query_repo = Config.QUERY_REPO
         if variant_table is None:
             variant_table = Config.VARIANT_TABLE
@@ -32,6 +34,7 @@ class GenomicsQC(object):
         self.dataset = dataset
 
         # Set up logging
+        self.date = time.strftime("%Y%m%d-%H%M%S")
         self.setup_log(verbose)
 
         # Set up API clients
@@ -46,6 +49,8 @@ class GenomicsQC(object):
         self.failed_samples = {}
         self.failed_positions = {}
         self.failed_sample_calls = {}
+
+
 
     #### Specific types of QC functions ####
     # Sample level QC
@@ -64,12 +69,12 @@ class GenomicsQC(object):
         queries = Queries.VARIANT_LEVEL_QC_QUERIES
         for q in queries:
             logging.debug(q)
-            failed = self.run_analysis(query_file=q, level='variant')
+            result = self.run_analysis(query_file=q, level='variant')
             # Determine if entire position needs to be removed or remove call for a specific sample
             if Queries.VARIANT_LEVEL_REMOVAL[q] == 'sample_call':
-                self.collect_failed_sample_calls(result, query)
+                self.collect_failed_sample_calls(result, q)
             elif Queries.VARIANT_LEVEL_REMOVAL[q] == 'position':
-                self.collect_failed_positions(result, query)
+                self.collect_failed_positions(result, q)
         self.remove_failed_sample_calls(self.failed_sample_calls)
         self.remove_failed_positions(self.failed_positions)
 
@@ -79,6 +84,7 @@ class GenomicsQC(object):
         # Check if this query requires cutoffs to be defined by average values
         if query_file in Queries.AVERAGE_STDDEV:
             prequery = Queries.AVERAGE_STDDEV[query_file]
+            logging.debug("Prequery required: %s" % prequery)
             cutoffs = self.average_stddev_cutoffs(prequery)
         query = self.prepare_query(query_file, preset_cutoffs=cutoffs)
         result = self.bq.run(query)
@@ -87,6 +93,7 @@ class GenomicsQC(object):
     #### Query set up ####
     # Set up the query, read it in, apply substitutions
     def prepare_query(self, query_file, preset_cutoffs=None):
+        logging.debug("Preparing query: %s" % query_file)
         raw_query = self.get_query(query_file)
         if preset_cutoffs is None:
             preset_cutoffs = self.get_preset_cutoffs(query_file)
@@ -125,10 +132,13 @@ class GenomicsQC(object):
 
     # Run metrics query to define cutoffs based on average and standard deviation values
     def average_stddev_cutoffs(self, query_file):
+        logging.debug("Getting average and standard deviation")
         query = self.prepare_query(query_file)
         result = self.bq.run(query)
         average, stddev = self.get_average_stddev(result)
+        logging.debug("Average: %s, Standard Deviation: %s" % (average, stddev))
         max, min = self.calculate_max_min(average, stddev)
+        logging.debug("Max: %s, Min: %s" % (max, min))
         substitutions = self.create_max_min_substitutions(max, min)
         return substitutions
 
@@ -180,6 +190,7 @@ class GenomicsQC(object):
 
     # Add failed samples to total
     def collect_failed_samples(self, result, query):
+        logging.debug("Collecting failed samples.")
         if result is None:
             return
         for r in result:
@@ -191,6 +202,7 @@ class GenomicsQC(object):
 
     # Add failed positions to total
     def collect_failed_positions(self, result, query):
+        logging.debug("Collecting failed positions.")
         if result is None:
             return
         for r in result:
@@ -202,6 +214,7 @@ class GenomicsQC(object):
 
     # Add failed sample calls to total
     def collect_failed_sample_calls(self, result, query):
+        logging.debug("Collecting failed calls.")
         if result is None:
             return
         for r in result:
@@ -238,41 +251,58 @@ class GenomicsQC(object):
     #### Functions to remove each type of failure ####
     # Remove samples from variant set given a dictionary of samples.  sample_id is dictionary key
     def remove_failed_samples(self, failed):
+        logging.debug("Removing failed samples.")
         for s in failed:
             self.remove_sample(s)
+        self.print_removed(failed, "samples")
 
     # Remove positions from variant set given a dictionary of positions.  position is dictionary key
     def remove_failed_positions(self, failed):
+        logging.debug("Removing failed positions.")
         for p in failed:
             reference_name, start, end = p.split("/")
             self.remove_variant(reference_name, start, end)
+        self.print_removed(failed, "positions")
 
     # Remove sample calls from variant set given a dictionary of sample positions.  sample-call is dictionary key
     def remove_failed_sample_calls(self, failed):
+        logging.debug("Removing failed calls.")
         for p in failed:
             sample_id, reference_name, start, end = p.split("/")
             self.remove_sample_call(sample_id, reference_name, start, end)
+        self.print_removed(failed, "calls")
 
     #### Google Genomics functions ####
     # Remove a single sample from a variant set
     def remove_sample(self, sample_id):
+        logging.debug("Removing sample: %s" % sample_id)
         call_set_id = self.gg.get_call_set_id(sample_id)
         if call_set_id is None:
-            logging.warn("Failed to retrieve call set id for %s." % sample_id)
+            logging.error("Failed to retrieve call set id for %s." % sample_id)
             return None
         self.gg.delete_call_set(call_set_id)
 
     # Remove an entire position from a variant set
     def remove_variant(self, reference_name, start, end):
+        logging.debug("Removing position: %s %s %s" % (reference_name, start, end))
         variant_id = self.gg.get_variant_id(reference_name=reference_name, start=start, end=end)
         if variant_id is None:
-            logging.warn("Failed to retrieve variant id for %s %s %s" % (reference_name, start, end))
+            logging.error("Failed to retrieve variant id for %s %s %s" % (reference_name, start, end))
         self.gg.delete_variant(variant_id)
 
     # Remove a variant of a specific call from a variant set
     def remove_sample_call(self, sample_id, reference_name, start, end):
+        logging.debug("Removing call: %s %s %s %s" % (sample_id, reference_name, start, end))
         # todo
         return None
+
+    #### Printing ####
+    def print_removed(self, failed, type):
+        file = "failed_%s.%s.tsv" % (type, self.date)
+        f = open(file,'a')
+        for r in failed:
+            f.write("%s\t%s\n" % (r, ",".join(failed[r])))
+        f.close()
 
     #### Miscellaneous functions ####
     # Check if a path exists
@@ -287,4 +317,5 @@ class GenomicsQC(object):
         else:
             log_level = logging.INFO
         # todo write to file
-        logging.basicConfig(format='%(asctime)s %(message)s', level=log_level)
+        logging.basicConfig(filename='genomics-qc.%s.log' % self.date,
+                            format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s', level=log_level)
