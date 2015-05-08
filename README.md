@@ -1,6 +1,8 @@
 # bigquery-genomics-qc
 Genomics QC pipeline on Google's BigQuery
+
 Gregory McInnes
+
 gmcinnes@stanford.edu
 
 ## Description
