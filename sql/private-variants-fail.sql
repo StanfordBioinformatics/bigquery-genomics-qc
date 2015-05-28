@@ -1,5 +1,5 @@
 SELECT 
-call.call_set_name,
+call.call_set_name AS sample_id,
 private_variant_count
 FROM (
   SELECT

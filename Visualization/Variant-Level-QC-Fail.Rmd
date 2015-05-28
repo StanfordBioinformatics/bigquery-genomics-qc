@@ -1,0 +1,200 @@
+<!-- R Markdown Documentation, DO NOT EDIT THE PLAIN MARKDOWN VERSION OF THIS FILE -->
+
+<!-- Copyright 2015 Google Inc. All rights reserved. -->
+
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); -->
+<!-- you may not use this file except in compliance with the License. -->
+<!-- You may obtain a copy of the License at -->
+
+<!--     http://www.apache.org/licenses/LICENSE-2.0 -->
+
+<!-- Unless required by applicable law or agreed to in writing, software -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS, -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!-- See the License for the specific language governing permissions and -->
+<!-- limitations under the License. -->
+
+# Variant-Level QC
+
+```{r echo=FALSE, eval=FALSE}
+######################[ CHANGE ME ]##################################
+# This codelab assumes that the current working directory is where the Rmd file resides.
+setwd("/Users/gmcinnes/GitHub/bigquery-genomics-qc/Visualization")
+
+# Set the Google Cloud Platform project id under which these queries will run.
+project <- "gbsc-gcp-project-mvp"
+#####################################################################
+```
+
+```{r echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+# Set up for BigQuery access.
+source("./rHelpers/setup.R")
+```
+
+* [Missingness Rate](#missingness-rate)
+* [Ti/Tv by Depth](#titv-by-depth)
+* [Blacklisted Variants](#blacklisted-variants)
+* [Heterozygous Haplotype](#heterozygous-haplotype)
+* [Ti/Tv by Genomic Window](#titv-by-genomic-window)
+* [Ti/Tv by Dpeth](#titv-by-depth)
+* [Hardy Weinberg Equilibrium](#hardy-weinberg-equilibrium)
+
+```{r}
+queryReplacements <- list("_THE_TABLE_"="va_aaa_pilot_data.all_genomes_gvcfs_20150514",
+                          "_THE_EXPANDED_TABLE_"="va_aaa_pilot_data.all_genomes_expanded_vcfs_java3",
+                          "_BLACKLISTED_TABLE_"="resources.blacklisted_positions")
+sampleData <- read.csv("./data/patient_info.csv")
+sampleInfo <- select(sampleData, call_call_set_name=Catalog.ID, gender=Gender)
+
+# To run this against other public data, source in one of the dataset helpers.  For example:
+# source("./rHelpers/pgpCGIOnlyDataset.R")
+```
+
+## Missingness Rate
+
+For each variant, compute the missingness rate.  This query can be used to identify variants with a poor call rate.
+
+```{r message=FALSE, warning=FALSE, comment=NA}
+cutoff = list("_CUTOFF_"="0.9")
+result <- DisplayAndDispatchQuery("../sql/variant-level-missingness-fail.sql",
+                                  project=project,
+                                  replacements=c(cutoff,
+                                                 queryReplacements))
+```
+Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
+
+Displaying the first few rows of the dataframe of results:
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
+if(is.null(result)) { 
+  cat("**None**") 
+} else {
+  print(xtable(head(result)), type="html", include.rownames=F)
+}
+```
+
+First few results
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
+print(xtable(head(result)), type="html", include.rownames=F)
+```
+
+## Blacklisted Variants
+
+```{r message=FALSE, warning=FALSE, comment=NA}
+query <- "../sql/blacklisted-variants.sql"
+result <- DisplayAndDispatchQuery(query,
+                                  project=project,
+                                  replacements=c(queryReplacements))
+```
+
+Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
+
+First few results
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
+print(xtable(head(result)), type="html", include.rownames=F)
+```
+
+## Heterozygous Haplotype
+For each variant within the X and Y chromosome, identify heterozygous variants in male genomes.
+
+First we use our sample information to determine which genomes are male.  
+```{r message=FALSE, warning=FALSE, comment=NA}
+maleSampleIds <- paste("'", filter(sampleInfo, gender == "M")$call_call_set_name, "'", sep="", collapse=",")
+```
+
+```{r message=FALSE, warning=FALSE, comment=NA}
+sortAndLimit <- "ORDER BY reference_name, start, alternate_bases, call.call_set_name LIMIT 1000"
+result <- DisplayAndDispatchQuery("../sql/sex-chromosome-heterozygous-haplotypes.sql",
+                                  project=project,
+                                  replacements=c("_MALE_SAMPLE_IDS_"=maleSampleIds,
+                                                 "#_ORDER_BY_"=sortAndLimit,
+                                                 queryReplacements))
+```
+Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
+
+Displaying the first few rows of the dataframe of results:
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
+if(is.null(result)) { 
+  cat("**None**") 
+} else {
+  print(xtable(head(result)), type="html", include.rownames=F)
+}
+```
+
+## Ti/Tv By Genomic Window
+```{r message=FALSE, warning=FALSE, comment=NA}
+query <- "../sql/titv-by-genomic-window-fail.sql"
+max <- 3.0
+min <- 1.5
+cutoffs <- list("_MAX_" = max, "_MIN_" = min)
+result <- DisplayAndDispatchQuery(query,
+                                  project=project,
+                                  replacements=c(queryReplacements, cutoffs))
+```
+
+Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
+
+First few results
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
+print(xtable(head(result)), type="html", include.rownames=F)
+```
+
+## Identify variants with average dpeth outside of defined range
+```{r message=FALSE, warning=FALSE, comment=NA}
+query <- "../sql/variant-depth-fail.sql"
+max <- 150
+min <- 10
+cutoffs <- list("_MAX_" = max, "_MIN_" = min)
+result <- DisplayAndDispatchQuery(query,
+                                  project=project,
+                                  replacements=c(queryReplacements, cutoffs))
+```
+
+Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
+
+First few results
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
+print(xtable(head(result)), type="html", include.rownames=F)
+```
+
+## Hardy Weinberg Equilibrium
+
+Here we want to identify the variants that are out of Hardy Weinberg Equilibrium.  We want to remove the top 0.05 quantile of variants, so first we have to define what the cutoff for the chi squared value should be.
+```{r message=FALSE, warning=FALSE, comment=NA}
+quantile <- list("_QUANTILE_" = 19) # <- Define quantile by number. 
+                                  # The 19th quantile selects the value that partitions the top 5% of values, 
+                                  # assuming there are 20 quantiles.
+result <- DisplayAndDispatchQuery("../sql/hwe-quantile.sql",
+                                  project=project,
+                                  replacements=c(queryReplacements, quantile))
+```
+
+Displaying the results:
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
+print(xtable(head(result)), type="html", include.rownames=F)
+```
+
+Determine the cutoffs:
+```{r}
+maxChiSq = result$quantile
+```
+Cutoff: `r maxChiSq`
+
+Determine which genomes are outside our desired range
+```{r message=FALSE, warning=FALSE, comment=NA}
+values = list("_CUTOFF_" = maxChiSq)
+result <- DisplayAndDispatchQuery("../sql/hwe-fail.sql",
+                                  project=project,
+                                  replacements=c(queryReplacements, values))
+```
+
+Displaying the first few results:
+```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
+print(xtable(head(result)), type="html", include.rownames=F)
+```
+
+
+
+
+
+
+

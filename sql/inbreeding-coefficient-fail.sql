@@ -1,5 +1,5 @@
 SELECT
-call.call_set_name,
+call.call_set_name AS sample_id,
 O_HOM,
 E_HOM,
 N_SITES,

@@ -1,10 +1,12 @@
 SELECT 
+variant_id,
 reference_name,
 start,
 end,
 missingness_rate,
 FROM (
   SELECT
+  variant_id,
   reference_name,
   start,
   end,
@@ -17,6 +19,7 @@ FROM (
   sample_count
   FROM (
     SELECT
+    variant_id,
     reference_name,
     start,
     end,
