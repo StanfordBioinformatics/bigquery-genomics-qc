@@ -21,11 +21,10 @@
 
 
 * [Missingness Rate](#missingness-rate)
-* [Ti/Tv by Depth](#titv-by-depth)
 * [Blacklisted Variants](#blacklisted-variants)
 * [Heterozygous Haplotype](#heterozygous-haplotype)
 * [Ti/Tv by Genomic Window](#titv-by-genomic-window)
-* [Ti/Tv by Dpeth](#titv-by-depth)
+* [Ti/Tv by Depth](#titv-by-depth)
 * [Hardy Weinberg Equilibrium](#hardy-weinberg-equilibrium)
 
 
