@@ -75,16 +75,5 @@ FROM js(
       )
 WHERE
   chisq > _CUTOFF_
-GROUP BY
-  variant_id,
-  reference_name,
-  start,
-  reference_bases,
-  alternate_bases,
-  obs_hom1,
-  obs_het,
-  obs_hom2,
-  e_hom1,
-  e_het,
-  e_hom2,
-  chisq
+#_ORDER_BY_
+

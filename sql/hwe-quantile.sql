@@ -8,7 +8,7 @@ FROM(
     ROW_NUMBER() OVER (ORDER BY quantile ASC) row_num,
   FROM (
     SELECT
-      QUANTILES(chisq, 20) AS quantile
+      QUANTILES(chisq, 2000) AS quantile
     FROM js(
       (SELECT
         reference_name,
