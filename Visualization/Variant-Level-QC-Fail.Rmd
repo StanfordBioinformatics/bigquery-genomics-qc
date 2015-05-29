@@ -130,6 +130,8 @@ print(xtable(head(result)), type="html", include.rownames=F)
 ```
 
 ## Ti/Tv By Depth
+
+We want to identify all the regions of the genome where the Ti/Tv ratio is outside of the expected range.  Another method we can use to do this is calculating the transition-transversion ratio by depth of coverage.  
 ```{r message=FALSE, warning=FALSE, comment=NA}
 query <- "../sql/titv-by-depth-fail.sql"
 max <- 3

@@ -1,8 +1,6 @@
 SELECT
   seq.variant_id AS variant_id,
-  seq.reference_name AS reference_name,
-  seq.start AS start,
-  seq.end AS end,
+  "blacklisted" AS failure_reason,
   bl.Artifact_Type AS Artifact_Type 
 FROM (
   SELECT

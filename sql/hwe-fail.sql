@@ -2,6 +2,7 @@
 SELECT
   variant_id,
   chisq,
+  "hardy_weinberg" AS failure_reason,
 FROM js(
     (SELECT
       variant_id,

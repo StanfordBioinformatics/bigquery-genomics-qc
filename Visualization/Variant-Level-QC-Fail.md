@@ -56,11 +56,7 @@ result <- DisplayAndDispatchQuery("../sql/variant-level-missingness-fail.sql",
 ```
 SELECT 
 variant_id,
-reference_name,
-start,
-end,
-called_allele_count,
-sample_count,
+"variant_missingness" AS failure_reason,
 missingness_rate,
 FROM (
   SELECT
@@ -107,15 +103,15 @@ Number of rows returned by this query: **1000**.
 
 Displaying the first few rows of the dataframe of results:
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 22:34:29 2015 -->
+<!-- Thu May 28 23:27:51 2015 -->
 <table border=1>
-<tr> <th> variant_id </th> <th> reference_name </th> <th> start </th> <th> end </th> <th> called_allele_count </th> <th> sample_count </th> <th> missingness_rate </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNBjGoqcBILa5z5Xskdv5GA </td> <td> chr4 </td> <td align="right"> 2740550 </td> <td align="right"> 2740553 </td> <td align="right">  10 </td> <td align="right"> 480 </td> <td align="right"> 0.98 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNBj1oqcBIKv21NDO_NqVbA </td> <td> chr4 </td> <td align="right"> 2740597 </td> <td align="right"> 2740602 </td> <td align="right">   2 </td> <td align="right"> 480 </td> <td align="right"> 1.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTQYnpb7GCDKq-ipvN7F3js </td> <td> chr14 </td> <td align="right"> 52349726 </td> <td align="right"> 52349727 </td> <td align="right">   4 </td> <td align="right"> 480 </td> <td align="right"> 0.99 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNhjV5vEbIJ6ApI3vwPyEngE </td> <td> chr6 </td> <td align="right"> 58487637 </td> <td align="right"> 58487638 </td> <td align="right"> 276 </td> <td align="right"> 480 </td> <td align="right"> 0.43 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNhi56PEbIK3T6Lrv562apwE </td> <td> chr6 </td> <td align="right"> 58487865 </td> <td align="right"> 58487866 </td> <td align="right"> 194 </td> <td align="right"> 480 </td> <td align="right"> 0.60 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNhjc6PEbIObnqPiO4MSaFQ </td> <td> chr6 </td> <td align="right"> 58487900 </td> <td align="right"> 58487901 </td> <td align="right">  74 </td> <td align="right"> 480 </td> <td align="right"> 0.85 </td> </tr>
+<tr> <th> variant_id </th> <th> failure_reason </th> <th> missingness_rate </th>  </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyOBiPkrYSINaAkcu-_vjBMg </td> <td> variant_missingness </td> <td align="right"> 1.00 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyOBiPkrYSIIL6vqvHnbDCkwE </td> <td> variant_missingness </td> <td align="right"> 1.00 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyOBiPkrYSIPrX7Z_V6YaY6gE </td> <td> variant_missingness </td> <td align="right"> 0.95 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxi8opgJII7ojImY18_xDw </td> <td> variant_missingness </td> <td align="right"> 1.00 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMjIYjsflFSCf1YSd_e2DyGQ </td> <td> variant_missingness </td> <td align="right"> 1.00 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMjIYncrlFSCC2MOYl9rulgQ </td> <td> variant_missingness </td> <td align="right"> 0.58 </td> </tr>
    </table>
 
 ## Blacklisted Variants
@@ -132,9 +128,7 @@ result <- DisplayAndDispatchQuery(query,
 ```
 SELECT
   seq.variant_id AS variant_id,
-  seq.reference_name AS reference_name,
-  seq.start AS start,
-  seq.end AS end,
+  "blacklisted" AS failure_reason,
   bl.Artifact_Type AS Artifact_Type 
 FROM (
   SELECT
@@ -164,15 +158,15 @@ Number of rows returned by this query: **1000**.
 
 First few results
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 22:34:31 2015 -->
+<!-- Thu May 28 23:27:54 2015 -->
 <table border=1>
-<tr> <th> variant_id </th> <th> reference_name </th> <th> start </th> <th> end </th> <th> Artifact_Type </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTEYi72EGCDEwbzL1Obo43U </td> <td> chr11 </td> <td align="right"> 50405003 </td> <td align="right"> 50405004 </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTEY2r2EGCChw63qz72392Y </td> <td> chr11 </td> <td align="right"> 50405082 </td> <td align="right"> 50405083 </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTEYir6EGCCJ8eya08SY2JwB </td> <td> chr11 </td> <td align="right"> 50405130 </td> <td align="right"> 50405131 </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTEY8r6EGCDJwKyomc7o6tAB </td> <td> chr11 </td> <td align="right"> 50405234 </td> <td align="right"> 50405235 </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTEY-76EGCCHy4Do4LOrmXw </td> <td> chr11 </td> <td align="right"> 50405243 </td> <td align="right"> 50405244 </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTEYtL-EGCCfy5q83uuftskB </td> <td> chr11 </td> <td align="right"> 50405300 </td> <td align="right"> 50405301 </td> <td> centromeric_repeat </td> </tr>
+<tr> <th> variant_id </th> <th> failure_reason </th> <th> Artifact_Type </th>  </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECCBtofbu9CGnAM </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECCy3u-brMbW0yA </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECC3hM2Hpemauk8 </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECCfqMXLhK_hkK4B </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECD0vsL30Naky7MB </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECCf4uzL7eTB39MB </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
    </table>
 
 ## Heterozygous Haplotype
@@ -190,11 +184,8 @@ result <- DisplayAndDispatchQuery("../sql/sex-chromosome-heterozygous-haplotypes
 ```
 SELECT
   variant_id,
-  reference_name,
-  start,
-  end,
-  reference_bases,
   sample_id,
+  "heterozygous_haplotype" AS failure_reason,
 FROM (
 SELECT
   variant_id,
@@ -243,15 +234,15 @@ Number of rows returned by this query: **1000**.
 
 Displaying the first few rows of the dataframe of results:
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 22:34:34 2015 -->
+<!-- Thu May 28 23:27:56 2015 -->
 <table border=1>
-<tr> <th> variant_id </th> <th> reference_name </th> <th> start </th> <th> end </th> <th> reference_bases </th> <th> sample_id </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRis4rgGINPtubrox5zX6wE </td> <td> chrY </td> <td align="right"> 13513004 </td> <td align="right"> 13513005 </td> <td> A </td> <td> LP6005243-DNA_E03 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRis4rgGINPtubrox5zX6wE </td> <td> chrY </td> <td align="right"> 13513004 </td> <td align="right"> 13513005 </td> <td> A </td> <td> LP6005243-DNA_E06 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRis4rgGINPtubrox5zX6wE </td> <td> chrY </td> <td align="right"> 13513004 </td> <td align="right"> 13513005 </td> <td> A </td> <td> LP6005051-DNA_D10 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRis4rgGINPtubrox5zX6wE </td> <td> chrY </td> <td align="right"> 13513004 </td> <td align="right"> 13513005 </td> <td> A </td> <td> LP6005051-DNA_F10 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRis4rgGINPtubrox5zX6wE </td> <td> chrY </td> <td align="right"> 13513004 </td> <td align="right"> 13513005 </td> <td> A </td> <td> LP6005051-DNA_C12 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRis4rgGINPtubrox5zX6wE </td> <td> chrY </td> <td align="right"> 13513004 </td> <td align="right"> 13513005 </td> <td> A </td> <td> LP6005692-DNA_B08 </td> </tr>
+<tr> <th> variant_id </th> <th> sample_id </th> <th> failure_reason </th>  </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjCwsAGIKmQkKr-kvGPjwE </td> <td> LP6005038-DNA_C09 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005038-DNA_B03 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_F07 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_C03 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005051-DNA_F10 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_H09 </td> <td> heterozygous_haplotype </td> </tr>
    </table>
 
 ## Ti/Tv By Genomic Window
@@ -270,8 +261,7 @@ result <- DisplayAndDispatchQuery(query,
 ```
 SELECT
 var.variant_id AS variant_id,
-var.reference_name AS reference_name,
-win.window_start AS window_start,
+"titv_by_genomic_window" AS failure_reason,
 FROM (
   SELECT
   variant_id,
@@ -337,27 +327,35 @@ ON
 var.window = win.window
 GROUP BY 
 variant_id,
-reference_name,
-window_start,
+var.reference_name,
+var.window_start,
 LIMIT 1000
+```
+
+```
+Error: var.window_start is not a field of either table in the join
+
+query invalidQuery. var.window_start is not a field of either table in the join
 ```
 
 Number of rows returned by this query: **1000**.
 
 First few results
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 22:34:36 2015 -->
+<!-- Thu May 28 23:27:59 2015 -->
 <table border=1>
-<tr> <th> variant_id </th> <th> reference_name </th> <th> window_start </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTcY-OCdGCD6p5PL_72AvNkB </td> <td> chr17 </td> <td align="right"> 50800000 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTcYq-KdGCCh9KfbhPm_4yE </td> <td> chr17 </td> <td align="right"> 50800000 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTcYv-OdGCDk-b_0xOmlqYUB </td> <td> chr17 </td> <td align="right"> 50800000 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTcY6-OdGCDppvaNjJi93F4 </td> <td> chr17 </td> <td align="right"> 50800000 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTcYreSdGCCPoOTNtZTTz3I </td> <td> chr17 </td> <td align="right"> 50800000 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTcYxuSdGCDZlpGl5MuN0VE </td> <td> chr17 </td> <td align="right"> 50800000 </td> </tr>
+<tr> <th> variant_id </th> <th> sample_id </th> <th> failure_reason </th>  </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjCwsAGIKmQkKr-kvGPjwE </td> <td> LP6005038-DNA_C09 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005038-DNA_B03 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_F07 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_C03 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005051-DNA_F10 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_H09 </td> <td> heterozygous_haplotype </td> </tr>
    </table>
 
 ## Ti/Tv By Depth
+
+We want to identify all the regions of the genome where the Ti/Tv ratio is outside of the expected range.  Another method we can use to do this is calculating the transition-transversion ratio by depth of coverage.  
 
 ```r
 query <- "../sql/titv-by-depth-fail.sql"
@@ -431,7 +429,7 @@ Number of rows returned by this query: **1000**.
 
 First few results
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 22:34:39 2015 -->
+<!-- Thu May 28 23:28:01 2015 -->
 <table border=1>
 <tr> <th> sample_id </th> <th> titv_ratio </th> <th> depth </th>  </tr>
   <tr> <td> LP6005051-DNA_A11 </td> <td align="right"> 1.49 </td> <td align="right">   1 </td> </tr>
@@ -464,7 +462,8 @@ result <- DisplayAndDispatchQuery(query,
 ```
 SELECT
   variant_id,
-  call.call_set_name,
+  call.call_set_name AS sample_id,
+  "titv_by_depth" AS failure_reason,
 FROM
   [va_aaa_pilot_data.all_genomes_expanded_vcfs_java3]
 WHERE
@@ -480,15 +479,15 @@ LIMIT 1000
 
 First few results
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 22:34:43 2015 -->
+<!-- Thu May 28 23:28:07 2015 -->
 <table border=1>
-<tr> <th> variant_id </th> <th> call_call_set_name </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYYxa_YHyChkfm3vL_J8_UB </td> <td> LP6005051-DNA_D12 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY0q_YHyCoh4O5gKnYlVM </td> <td> LP6005051-DNA_D12 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY1a_YHyDA7_fkkdKghv0B </td> <td> LP6005051-DNA_D12 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY3K_YHyDQ7eCY4OWi_Xk </td> <td> LP6005051-DNA_D12 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY3a_YHyDI_frmo-aI0UU </td> <td> LP6005051-DNA_D12 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY76_YHyC2n_b3-oCHh7oB </td> <td> LP6005051-DNA_D12 </td> </tr>
+<tr> <th> variant_id </th> <th> sample_id </th> <th> failure_reason </th>  </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhjks4VzIIu2xfH4l8iM3AE </td> <td> LP6005051-DNA_A12 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhj4s4VzIKugsNeghNTxCQ </td> <td> LP6005051-DNA_A12 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhj4s4VzIKugsNeghNTxCQ </td> <td> LP6005051-DNA_A10 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhj4s4VzIOC9rLb4q6HKLA </td> <td> LP6005051-DNA_A12 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhj4s4VzIOC9rLb4q6HKLA </td> <td> LP6005051-DNA_A10 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhiBtIVzIKCnkoeB4ouz5wE </td> <td> LP6005051-DNA_A12 </td> <td> titv_by_depth </td> </tr>
    </table>
 
 ## Ti/Tv By Alternate Allele Counts
@@ -605,7 +604,7 @@ FROM(
 WHERE 
   row_num = 1999
 
-Running query:   RUNNING  2.5s
+Running query:   RUNNING  2.6s
 Running query:   RUNNING  3.2s
 Running query:   RUNNING  3.8s
 Running query:   RUNNING  4.4s
@@ -613,62 +612,60 @@ Running query:   RUNNING  5.0s
 Running query:   RUNNING  5.7s
 Running query:   RUNNING  6.3s
 Running query:   RUNNING  6.9s
-Running query:   RUNNING  7.6s
+Running query:   RUNNING  7.5s
 Running query:   RUNNING  8.2s
 Running query:   RUNNING  8.8s
-Running query:   RUNNING  9.5s
-Running query:   RUNNING 10.1s
+Running query:   RUNNING  9.4s
+Running query:   RUNNING 10.0s
 Running query:   RUNNING 10.7s
-Running query:   RUNNING 11.4s
-Running query:   RUNNING 12.0s
+Running query:   RUNNING 11.3s
+Running query:   RUNNING 11.9s
 Running query:   RUNNING 12.6s
 Running query:   RUNNING 13.2s
-Running query:   RUNNING 13.9s
-Running query:   RUNNING 14.5s
-Running query:   RUNNING 15.1s
+Running query:   RUNNING 13.8s
+Running query:   RUNNING 14.4s
+Running query:   RUNNING 15.0s
 Running query:   RUNNING 15.7s
-Running query:   RUNNING 16.4s
-Running query:   RUNNING 17.0s
-Running query:   RUNNING 17.6s
-Running query:   RUNNING 18.3s
-Running query:   RUNNING 18.9s
-Running query:   RUNNING 19.5s
-Running query:   RUNNING 20.2s
-Running query:   RUNNING 20.8s
-Running query:   RUNNING 21.4s
-Running query:   RUNNING 22.0s
-Running query:   RUNNING 22.7s
-Running query:   RUNNING 23.3s
-Running query:   RUNNING 23.9s
-Running query:   RUNNING 24.5s
-Running query:   RUNNING 25.2s
-Running query:   RUNNING 25.8s
-Running query:   RUNNING 26.4s
-Running query:   RUNNING 27.1s
-Running query:   RUNNING 27.7s
-Running query:   RUNNING 28.3s
-Running query:   RUNNING 29.0s
-Running query:   RUNNING 29.7s
+Running query:   RUNNING 16.3s
+Running query:   RUNNING 16.9s
+Running query:   RUNNING 17.5s
+Running query:   RUNNING 18.1s
+Running query:   RUNNING 18.8s
+Running query:   RUNNING 19.4s
+Running query:   RUNNING 20.0s
+Running query:   RUNNING 20.6s
+Running query:   RUNNING 21.2s
+Running query:   RUNNING 21.9s
+Running query:   RUNNING 22.5s
+Running query:   RUNNING 23.1s
+Running query:   RUNNING 23.7s
+Running query:   RUNNING 24.3s
+Running query:   RUNNING 25.0s
+Running query:   RUNNING 25.6s
+Running query:   RUNNING 26.2s
+Running query:   RUNNING 26.8s
+Running query:   RUNNING 27.4s
+Running query:   RUNNING 28.1s
+Running query:   RUNNING 28.7s
+Running query:   RUNNING 29.3s
 Running query:   RUNNING 30.3s
 Running query:   RUNNING 30.9s
-Running query:   RUNNING 31.5s
+Running query:   RUNNING 31.6s
 Running query:   RUNNING 32.2s
-Running query:   RUNNING 33.0s
-Running query:   RUNNING 33.7s
-Running query:   RUNNING 34.3s
-Running query:   RUNNING 34.9s
-Running query:   RUNNING 35.5s
-Running query:   RUNNING 36.2s
-Running query:   RUNNING 36.8s
-Running query:   RUNNING 37.4s
+Running query:   RUNNING 32.8s
+Running query:   RUNNING 33.4s
+Running query:   RUNNING 34.0s
+Running query:   RUNNING 34.7s
+Running query:   RUNNING 35.3s
+Running query:   RUNNING 35.9s
 ```
 
 Displaying the results:
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 22:35:24 2015 -->
+<!-- Thu May 28 23:28:45 2015 -->
 <table border=1>
 <tr> <th> quantile </th> <th> row_num </th>  </tr>
-  <tr> <td align="right"> 657.00 </td> <td align="right"> 1999 </td> </tr>
+  <tr> <td align="right"> 666.70 </td> <td align="right"> 1999 </td> </tr>
    </table>
 
 Determine the cutoffs:
@@ -676,7 +673,7 @@ Determine the cutoffs:
 ```r
 maxChiSq = result$quantile
 ```
-Cutoff: 657
+Cutoff: 666.6987564
 
 Determine which genomes are outside our desired range
 
@@ -693,6 +690,7 @@ result <- DisplayAndDispatchQuery("../sql/hwe-fail.sql",
 SELECT
   variant_id,
   chisq,
+  "hardy_weinberg" AS failure_reason,
 FROM js(
     (SELECT
       variant_id,
@@ -765,7 +763,7 @@ FROM js(
         }"
       )
 WHERE
-  chisq > 657
+  chisq > 666.698756405954
 LIMIT 1000
 
 
@@ -773,94 +771,28 @@ Running query:   RUNNING  2.5s
 Running query:   RUNNING  3.2s
 Running query:   RUNNING  3.8s
 Running query:   RUNNING  4.4s
-Running query:   RUNNING  5.1s
+Running query:   RUNNING  5.0s
 Running query:   RUNNING  5.7s
 Running query:   RUNNING  6.3s
-Running query:   RUNNING  7.0s
-Running query:   RUNNING  7.6s
+Running query:   RUNNING  6.9s
+Running query:   RUNNING  7.5s
 Running query:   RUNNING  8.2s
-Running query:   RUNNING  8.9s
-Running query:   RUNNING  9.5s
-Running query:   RUNNING 10.1s
-Running query:   RUNNING 10.7s
-Running query:   RUNNING 11.4s
-Running query:   RUNNING 12.0s
-Running query:   RUNNING 12.7s
-Running query:   RUNNING 13.4s
-Running query:   RUNNING 14.0s
-Running query:   RUNNING 14.6s
-Running query:   RUNNING 15.3s
-Running query:   RUNNING 15.9s
-Running query:   RUNNING 16.6s
-Running query:   RUNNING 17.2s
-Running query:   RUNNING 17.8s
-Running query:   RUNNING 18.5s
-Running query:   RUNNING 19.1s
-Running query:   RUNNING 19.7s
-Running query:   RUNNING 20.4s
-Running query:   RUNNING 21.1s
-Running query:   RUNNING 21.7s
-Running query:   RUNNING 22.4s
-Running query:   RUNNING 23.0s
-Running query:   RUNNING 23.6s
-Running query:   RUNNING 24.2s
-Running query:   RUNNING 24.9s
-Running query:   RUNNING 25.5s
-Running query:   RUNNING 26.1s
-Running query:   RUNNING 26.8s
-Running query:   RUNNING 27.4s
-Running query:   RUNNING 28.0s
-Running query:   RUNNING 28.6s
-Running query:   RUNNING 29.3s
-Running query:   RUNNING 29.9s
-Running query:   RUNNING 30.5s
-Running query:   RUNNING 31.2s
-Running query:   RUNNING 31.8s
-Running query:   RUNNING 32.5s
-Running query:   RUNNING 33.1s
-Running query:   RUNNING 33.7s
-Running query:   RUNNING 34.3s
-Running query:   RUNNING 35.0s
-Running query:   RUNNING 35.6s
-Running query:   RUNNING 36.2s
-Running query:   RUNNING 36.9s
-Running query:   RUNNING 37.5s
-Running query:   RUNNING 38.1s
-Running query:   RUNNING 38.8s
-Running query:   RUNNING 39.4s
-Running query:   RUNNING 40.1s
-Running query:   RUNNING 40.8s
-Running query:   RUNNING 41.4s
-Running query:   RUNNING 42.0s
-Running query:   RUNNING 42.7s
-Running query:   RUNNING 43.3s
-Running query:   RUNNING 43.9s
-Running query:   RUNNING 44.6s
-Running query:   RUNNING 45.2s
-Running query:   RUNNING 45.8s
-Running query:   RUNNING 46.4s
-Running query:   RUNNING 47.1s
-Running query:   RUNNING 47.7s
-Running query:   RUNNING 48.3s
-Running query:   RUNNING 49.0s
-Running query:   RUNNING 49.6s
-Running query:   RUNNING 50.2s
-Running query:   RUNNING 50.8s
-Running query:   RUNNING 51.5s
-Running query:   RUNNING 52.2s
+Running query:   RUNNING  8.8s
+Running query:   RUNNING  9.4s
+Running query:   RUNNING 10.0s
 ```
 
 Displaying the first few results:
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 22:36:20 2015 -->
+<!-- Thu May 28 23:28:59 2015 -->
 <table border=1>
-<tr> <th> variant_id </th> <th> chisq </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBjo5rNCIIPIr7SCv8_QHA </td> <td align="right"> 877.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBiZ57NCIPm9gsCurJ-0jQE </td> <td align="right"> 878.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBjl57NCILHDy5yRh8rbUg </td> <td align="right"> 877.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBio6LNCIKG_l9SU9ZXYrgE </td> <td align="right"> 878.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhjdiqJzIP_HpKrtzev4Dg </td> <td align="right"> 851.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBisip8RINDgkvqZot_Qfg </td> <td align="right"> 881.00 </td> </tr>
+<tr> <th> variant_id </th> <th> chisq </th> <th> failure_reason </th>  </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRiAgdoKIOeuxIOxpuaWMg </td> <td align="right"> 752.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRiOgdoKILWn86jooqzZfg </td> <td align="right"> 754.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRiKgtoKIMSDhYD_yNP-Tg </td> <td align="right"> 761.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjig9oKINzC9LuTzcbRsAE </td> <td align="right"> 747.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjug9oKIK6R-Zv2gZ-jnwE </td> <td align="right"> 750.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRi1hdoKIKzTlYDwv6zkkQE </td> <td align="right"> 851.00 </td> <td> hardy_weinberg </td> </tr>
    </table>
 
 

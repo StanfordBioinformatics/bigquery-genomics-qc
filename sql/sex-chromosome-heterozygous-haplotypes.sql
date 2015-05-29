@@ -1,10 +1,7 @@
 SELECT
   variant_id,
-  reference_name,
-  start,
-  end,
-  reference_bases,
   sample_id,
+  "heterozygous_haplotype" AS failure_reason,
 FROM (
 SELECT
   variant_id,

@@ -1,7 +1,7 @@
 SELECT
 var.variant_id AS variant_id,
-var.reference_name AS reference_name,
-win.window_start AS window_start,
+titv,
+"titv_by_genomic_window" AS failure_reason,
 FROM (
   SELECT
   variant_id,
@@ -67,7 +67,8 @@ ON
 var.window = win.window
 GROUP BY 
 variant_id,
-reference_name,
-window_start,
+var.reference_name,
+win.window_start,
+titv,
 #_ORDER_BY_
 

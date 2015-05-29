@@ -1,10 +1,6 @@
 SELECT 
 variant_id,
-reference_name,
-start,
-end,
-called_allele_count,
-sample_count,
+"variant_missingness" AS failure_reason,
 missingness_rate,
 FROM (
   SELECT

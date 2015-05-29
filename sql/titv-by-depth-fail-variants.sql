@@ -1,6 +1,7 @@
 SELECT
   variant_id,
-  call.call_set_name,
+  call.call_set_name AS sample_id,
+  "titv_by_depth" AS failure_reason,
 FROM
   [_THE_EXPANDED_TABLE_]
 WHERE
