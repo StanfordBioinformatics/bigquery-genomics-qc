@@ -28,6 +28,7 @@ JOIN (
   FROM (
     SELECT
     reference_name,
+    window,
     window * 100000 AS window_start,
     transitions,
     transversions,

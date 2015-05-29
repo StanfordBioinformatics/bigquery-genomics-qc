@@ -18,7 +18,7 @@ require(RCurl)
 require(dplyr)
 require(ggplot2)
 
-DisplayAndDispatchQuery <- function(queryUri, project, replacements=list(), largeResults=TRUE, outputTable=NULL) {
+DisplayAndDispatchQuery <- function(queryUri, project, replacements=list(), outputTable=NULL) {
   if (missing(queryUri)) {
     stop("Pass the file path or url to the file containing the query.")
   }

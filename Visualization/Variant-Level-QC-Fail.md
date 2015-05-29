@@ -34,8 +34,6 @@ queryReplacements <- list("_THE_TABLE_"="va_aaa_pilot_data.all_genomes_gvcfs_201
                           "_THE_EXPANDED_TABLE_"="va_aaa_pilot_data.all_genomes_expanded_vcfs_java3",
                           "_PATIENT_INFO_"="va_aaa_pilot_data.patient_info",
                           "_BLACKLISTED_TABLE_"="resources.blacklisted_positions")
-sampleData <- read.csv("./data/patient_info.csv")
-sampleInfo <- select(sampleData, call_call_set_name=Catalog.ID, gender=Gender)
 ```
 
 ## Missingness Rate
@@ -46,11 +44,11 @@ Identify all variants with a missingness rate greater than a specified cutoff.
 ```r
 cutoff = list("_CUTOFF_"="0.1")
 sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
+outputTable = 'qc_tables.variant_missingness'
 result <- DisplayAndDispatchQuery("../sql/variant-level-missingness-fail.sql",
                                   project=project,
-                                  replacements=c(cutoff,
-                                                 queryReplacements,
-                                                 sortAndLimit))
+                                  replacements=c(cutoff, queryReplacements),
+                                  outputTable=outputTable)
 ```
 
 ```
@@ -97,21 +95,61 @@ FROM (
 WHERE
 missingness_rate > 0.1
 # Optionally add a clause here to sort and limit the results.
-LIMIT 1000
+#_ORDER_BY_
+
+Running query:   RUNNING  2.4s
+Running query:   RUNNING  3.1s
+Running query:   RUNNING  3.7s
+Running query:   RUNNING  4.4s
+Running query:   RUNNING  5.0s
+Running query:   RUNNING  5.6s
+Running query:   RUNNING  6.3s
+Running query:   RUNNING  6.9s
+Running query:   RUNNING  7.6s
+Running query:   RUNNING  8.2s
+Running query:   RUNNING  8.9s
+Running query:   RUNNING  9.5s
+Running query:   RUNNING 10.1s
+Running query:   RUNNING 10.8s
+Running query:   RUNNING 11.4s
+Running query:   RUNNING 12.1s
+Running query:   RUNNING 12.7s
+Running query:   RUNNING 13.4s
+Running query:   RUNNING 14.0s
+Running query:   RUNNING 14.6s
+Running query:   RUNNING 15.3s
+Running query:   RUNNING 15.9s
+Running query:   RUNNING 16.5s
+Running query:   RUNNING 17.2s
+Running query:   RUNNING 17.8s
+Running query:   RUNNING 18.5s
+Running query:   RUNNING 19.1s
+Running query:   RUNNING 19.7s
+Running query:   RUNNING 20.4s
+Running query:   RUNNING 21.0s
+
+Retrieving data:  3.1s
+Retrieving data:  4.3s
+Retrieving data:  5.9s
+Retrieving data:  7.1s
+Retrieving data:  8.3s
+Retrieving data:  9.6s
+Retrieving data: 11.7s
+Retrieving data: 13.0s
 ```
-Number of rows returned by this query: **1000**.
+Number of rows returned by this query: **100000**.
 
 Displaying the first few rows of the dataframe of results:
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 23:27:51 2015 -->
+<!-- Fri May 29 01:38:39 2015 -->
 <table border=1>
 <tr> <th> variant_id </th> <th> failure_reason </th> <th> missingness_rate </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyOBiPkrYSINaAkcu-_vjBMg </td> <td> variant_missingness </td> <td align="right"> 1.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyOBiPkrYSIIL6vqvHnbDCkwE </td> <td> variant_missingness </td> <td align="right"> 1.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyOBiPkrYSIPrX7Z_V6YaY6gE </td> <td> variant_missingness </td> <td align="right"> 0.95 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxi8opgJII7ojImY18_xDw </td> <td> variant_missingness </td> <td align="right"> 1.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMjIYjsflFSCf1YSd_e2DyGQ </td> <td> variant_missingness </td> <td align="right"> 1.00 </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMjIYncrlFSCC2MOYl9rulgQ </td> <td> variant_missingness </td> <td align="right"> 0.58 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTUYkMncLyCMs-GNmMze2Uw </td> <td> variant_missingness </td> <td align="right"> 0.74 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNhjaiJkiILrb8aW85dSamAE </td> <td> variant_missingness </td> <td align="right"> 0.99 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMxj4m6oNILLekc-Goaq_Hw </td> <td> variant_missingness </td> <td align="right"> 0.90 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYYyNLDGiCozICax4WkqgQ </td> <td> variant_missingness </td> <td align="right"> 0.97 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY3tXDGiDWkImGkeeJgHM </td> <td> variant_missingness </td> <td align="right"> 0.95 </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTAYwdXhOyC7nOCPrp6hyKMB </td> <td> variant_missingness </td> <td align="right"> 0.38 </td> </tr>
    </table>
 
 ## Blacklisted Variants
@@ -120,9 +158,11 @@ Displaying the first few rows of the dataframe of results:
 ```r
 query <- "../sql/blacklisted-variants.sql"
 sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
+outputTable = 'qc_tables.blacklisted'
 result <- DisplayAndDispatchQuery(query,
                                   project=project,
-                                  replacements=c(queryReplacements, sortAndLimit))
+                                  replacements=c(queryReplacements),
+                                  outputTable=outputTable)
 ```
 
 ```
@@ -151,22 +191,93 @@ ON
 WHERE 
   seq.start >= bl.start AND
   seq.end <= bl.end
-LIMIT 1000
+#_ORDER_BY_
+
+
+Running query:   RUNNING  2.6s
+Running query:   RUNNING  3.2s
+Running query:   RUNNING  3.8s
+Running query:   RUNNING  4.5s
+Running query:   RUNNING  5.1s
+Running query:   RUNNING  5.8s
+Running query:   RUNNING  6.4s
+Running query:   RUNNING  7.0s
+Running query:   RUNNING  7.7s
+Running query:   RUNNING  8.3s
+Running query:   RUNNING  9.0s
+Running query:   RUNNING  9.6s
+Running query:   RUNNING 10.3s
+Running query:   RUNNING 10.9s
+Running query:   RUNNING 11.5s
+Running query:   RUNNING 12.2s
+Running query:   RUNNING 12.8s
+Running query:   RUNNING 13.5s
+Running query:   RUNNING 14.1s
+Running query:   RUNNING 14.8s
+Running query:   RUNNING 15.4s
+Running query:   RUNNING 16.0s
+Running query:   RUNNING 16.7s
+Running query:   RUNNING 17.4s
+Running query:   RUNNING 18.0s
+Running query:   RUNNING 18.6s
+Running query:   RUNNING 19.3s
+Running query:   RUNNING 19.9s
+Running query:   RUNNING 20.6s
+Running query:   RUNNING 21.2s
+Running query:   RUNNING 21.8s
+Running query:   RUNNING 22.5s
+Running query:   RUNNING 23.1s
+Running query:   RUNNING 23.7s
+Running query:   RUNNING 24.6s
+Running query:   RUNNING 25.2s
+Running query:   RUNNING 25.9s
+Running query:   RUNNING 26.5s
+Running query:   RUNNING 27.1s
+Running query:   RUNNING 27.8s
+Running query:   RUNNING 28.4s
+Running query:   RUNNING 29.1s
+Running query:   RUNNING 29.7s
+Running query:   RUNNING 30.4s
+Running query:   RUNNING 31.0s
+Running query:   RUNNING 31.7s
+Running query:   RUNNING 32.3s
+Running query:   RUNNING 32.9s
+Running query:   RUNNING 33.6s
+Running query:   RUNNING 34.2s
+Running query:   RUNNING 34.9s
+Running query:   RUNNING 35.5s
+Running query:   RUNNING 36.2s
+Running query:   RUNNING 36.8s
+Running query:   RUNNING 37.4s
+Running query:   RUNNING 38.1s
+Running query:   RUNNING 38.7s
+Running query:   RUNNING 39.3s
+Running query:   RUNNING 40.0s
+Running query:   RUNNING 40.6s
+
+Retrieving data:  3.2s
+Retrieving data:  4.5s
+Retrieving data:  6.2s
+Retrieving data:  7.4s
+Retrieving data:  8.5s
+Retrieving data:  9.7s
+Retrieving data: 10.9s
+Retrieving data: 12.4s
 ```
 
-Number of rows returned by this query: **1000**.
+Number of rows returned by this query: **100000**.
 
 First few results
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 23:27:54 2015 -->
+<!-- Fri May 29 01:39:34 2015 -->
 <table border=1>
 <tr> <th> variant_id </th> <th> failure_reason </th> <th> Artifact_Type </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECCBtofbu9CGnAM </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECCy3u-brMbW0yA </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECC3hM2Hpemauk8 </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECCfqMXLhK_hkK4B </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECD0vsL30Naky7MB </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTYY-c2ZECCf4uzL7eTB39MB </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxjK9MkbIJmz2tqq5aPZIA </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxjY9ckbIJvEw8zv-aa_4AE </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxja9skbILuo0aD8gqWVyQE </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxj-9skbIMi8oIXuz9blcA </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxiq98kbILq5taqRjNjPCQ </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxik-MkbIJ-Yk4Xp-4CY6QE </td> <td> blacklisted </td> <td> centromeric_repeat </td> </tr>
    </table>
 
 ## Heterozygous Haplotype
@@ -174,11 +285,12 @@ For each variant within the X and Y chromosome, identify heterozygous variants i
 
 
 ```r
-sortAndLimit <- "LIMIT 1000"
+sortAndLimit <- list("_LIMIT_" = "LIMIT 1000")
+outputTable = 'qc_tables.heterozygous_haplotype'
 result <- DisplayAndDispatchQuery("../sql/sex-chromosome-heterozygous-haplotypes.sql",
                                   project=project,
-                                  replacements=c("#_ORDER_BY_"=sortAndLimit,
-                                                 queryReplacements))
+                                  replacements=c(queryReplacements),
+                                  outputTable=outputTable)
 ```
 
 ```
@@ -228,21 +340,131 @@ ON
 WHERE
   SEX = 'M'
 # Optionally add a clause here to sort and limit the results.
-LIMIT 1000
+#_ORDER_BY_
+
+Running query:   RUNNING  2.6s
+Running query:   RUNNING  3.2s
+Running query:   RUNNING  3.9s
+Running query:   RUNNING  4.5s
+Running query:   RUNNING  5.1s
+Running query:   RUNNING  5.8s
+Running query:   RUNNING  7.2s
+Running query:   RUNNING  7.8s
+Running query:   RUNNING  8.5s
+Running query:   RUNNING  9.1s
+Running query:   RUNNING  9.8s
+Running query:   RUNNING 10.5s
+Running query:   RUNNING 11.1s
+Running query:   RUNNING 11.7s
+Running query:   RUNNING 12.4s
+Running query:   RUNNING 13.0s
+Running query:   RUNNING 13.7s
+Running query:   RUNNING 14.3s
+Running query:   RUNNING 14.9s
+Running query:   RUNNING 15.6s
+Running query:   RUNNING 16.2s
+Running query:   RUNNING 16.8s
+Running query:   RUNNING 17.5s
+Running query:   RUNNING 18.1s
+Running query:   RUNNING 18.8s
+Running query:   RUNNING 19.4s
+Running query:   RUNNING 20.0s
+Running query:   RUNNING 20.7s
+Running query:   RUNNING 21.3s
+Running query:   RUNNING 22.0s
+Running query:   RUNNING 22.6s
+Running query:   RUNNING 23.2s
+Running query:   RUNNING 23.9s
+Running query:   RUNNING 24.5s
+Running query:   RUNNING 25.1s
+Running query:   RUNNING 25.8s
+Running query:   RUNNING 26.4s
+Running query:   RUNNING 27.1s
+Running query:   RUNNING 27.7s
+Running query:   RUNNING 28.3s
+Running query:   RUNNING 29.0s
+Running query:   RUNNING 29.6s
+Running query:   RUNNING 30.2s
+Running query:   RUNNING 30.9s
+Running query:   RUNNING 31.5s
+Running query:   RUNNING 32.1s
+Running query:   RUNNING 32.8s
+Running query:   RUNNING 33.4s
+Running query:   RUNNING 34.1s
+Running query:   RUNNING 34.7s
+Running query:   RUNNING 35.3s
+Running query:   RUNNING 36.0s
+Running query:   RUNNING 36.6s
+Running query:   RUNNING 37.2s
+Running query:   RUNNING 37.9s
+Running query:   RUNNING 38.6s
+Running query:   RUNNING 39.2s
+Running query:   RUNNING 39.8s
+Running query:   RUNNING 40.5s
+Running query:   RUNNING 41.1s
+Running query:   RUNNING 41.8s
+Running query:   RUNNING 42.4s
+Running query:   RUNNING 43.0s
+Running query:   RUNNING 43.7s
+Running query:   RUNNING 44.3s
+Running query:   RUNNING 44.9s
+Running query:   RUNNING 45.6s
+Running query:   RUNNING 46.2s
+Running query:   RUNNING 46.9s
+Running query:   RUNNING 47.5s
+Running query:   RUNNING 48.1s
+Running query:   RUNNING 48.8s
+Running query:   RUNNING 49.4s
+Running query:   RUNNING 50.0s
+Running query:   RUNNING 50.7s
+Running query:   RUNNING 51.3s
+Running query:   RUNNING 52.0s
+Running query:   RUNNING 52.6s
+Running query:   RUNNING 53.2s
+Running query:   RUNNING 53.9s
+Running query:   RUNNING 54.5s
+Running query:   RUNNING 55.3s
+Running query:   RUNNING 55.9s
+Running query:   RUNNING 56.5s
+Running query:   RUNNING 57.2s
+Running query:   RUNNING 57.9s
+Running query:   RUNNING 58.5s
+Running query:   RUNNING 59.1s
+Running query:   RUNNING 59.8s
+Running query:   RUNNING 60.4s
+Running query:   RUNNING 61.0s
+Running query:   RUNNING 61.7s
+Running query:   RUNNING 62.3s
+Running query:   RUNNING 62.9s
+Running query:   RUNNING 63.6s
+Running query:   RUNNING 64.2s
+Running query:   RUNNING 64.8s
+Running query:   RUNNING 65.5s
+Running query:   RUNNING 66.5s
+
+Retrieving data:  2.1s
+Retrieving data:  4.1s
+Retrieving data:  5.4s
+Retrieving data:  7.1s
+Retrieving data:  8.5s
+Retrieving data: 10.2s
+Retrieving data: 11.5s
+Retrieving data: 13.3s
+Retrieving data: 15.4s
 ```
-Number of rows returned by this query: **1000**.
+Number of rows returned by this query: **100000**.
 
 Displaying the first few rows of the dataframe of results:
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 23:27:56 2015 -->
+<!-- Fri May 29 01:41:00 2015 -->
 <table border=1>
 <tr> <th> variant_id </th> <th> sample_id </th> <th> failure_reason </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjCwsAGIKmQkKr-kvGPjwE </td> <td> LP6005038-DNA_C09 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005038-DNA_B03 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_F07 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_C03 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005051-DNA_F10 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_H09 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBiwjtc6IMSTg8mc_ti7LA </td> <td> LP6005038-DNA_B02 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBiwjtc6IMSTg8mc_ti7LA </td> <td> LP6005243-DNA_E06 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBiMkdc6IMuXtLKq5IO5oAE </td> <td> LP6005144-DNA_D11 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBjalNc6IOCh9P-Q_ebUFA </td> <td> LP6005692-DNA_G01 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBiyu-kVILDA8-LAg-jr0wE </td> <td> LP6005038-DNA_B06 </td> <td> heterozygous_haplotype </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBi-u-kVIKazkNSwteO2Jg </td> <td> LP6005692-DNA_B02 </td> <td> heterozygous_haplotype </td> </tr>
    </table>
 
 ## Ti/Tv By Genomic Window
@@ -253,14 +475,17 @@ sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
 max <- 3.0
 min <- 1.5
 cutoffs <- list("_MAX_" = max, "_MIN_" = min)
+outputTable = 'qc_tables.titv_genomic_window'
 result <- DisplayAndDispatchQuery(query,
                                   project=project,
-                                  replacements=c(queryReplacements, cutoffs, sortAndLimit))
+                                  replacements=c(queryReplacements, cutoffs),
+                                  outputTable=outputTable)
 ```
 
 ```
 SELECT
 var.variant_id AS variant_id,
+titv,
 "titv_by_genomic_window" AS failure_reason,
 FROM (
   SELECT
@@ -288,6 +513,7 @@ JOIN (
   FROM (
     SELECT
     reference_name,
+    window,
     window * 100000 AS window_start,
     transitions,
     transversions,
@@ -328,29 +554,71 @@ var.window = win.window
 GROUP BY 
 variant_id,
 var.reference_name,
-var.window_start,
-LIMIT 1000
+win.window_start,
+titv,
+#_ORDER_BY_
+
+
+Running query:   RUNNING  2.5s
+Running query:   RUNNING  3.2s
+Running query:   RUNNING  3.8s
+Running query:   RUNNING  4.5s
+Running query:   RUNNING  5.1s
+Running query:   RUNNING  5.8s
+Running query:   RUNNING  6.4s
+Running query:   RUNNING  7.0s
+Running query:   RUNNING  7.7s
+Running query:   RUNNING  8.3s
+Running query:   RUNNING  8.9s
+Running query:   RUNNING  9.6s
+Running query:   RUNNING 10.3s
+Running query:   RUNNING 10.9s
+Running query:   RUNNING 11.5s
+Running query:   RUNNING 12.2s
+Running query:   RUNNING 12.8s
+Running query:   RUNNING 13.5s
+Running query:   RUNNING 14.1s
+Running query:   RUNNING 14.7s
+Running query:   RUNNING 15.4s
+Running query:   RUNNING 16.0s
+Running query:   RUNNING 16.6s
+Running query:   RUNNING 17.3s
+Running query:   RUNNING 17.9s
+Running query:   RUNNING 18.5s
+Running query:   RUNNING 19.2s
+Running query:   RUNNING 19.8s
+Running query:   RUNNING 20.5s
+Running query:   RUNNING 21.1s
+Running query:   RUNNING 21.8s
+Running query:   RUNNING 22.4s
+Running query:   RUNNING 23.1s
+Running query:   RUNNING 23.7s
+Running query:   RUNNING 24.3s
+
+Retrieving data:  2.2s
+Retrieving data:  3.4s
+Retrieving data:  5.1s
+Retrieving data:  6.2s
+Retrieving data:  7.3s
+Retrieving data:  8.5s
+Retrieving data:  9.9s
+Retrieving data: 11.3s
+Retrieving data: 12.9s
 ```
 
-```
-Error: var.window_start is not a field of either table in the join
-
-query invalidQuery. var.window_start is not a field of either table in the join
-```
-
-Number of rows returned by this query: **1000**.
+Number of rows returned by this query: **100000**.
 
 First few results
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 23:27:59 2015 -->
+<!-- Fri May 29 01:41:42 2015 -->
 <table border=1>
-<tr> <th> variant_id </th> <th> sample_id </th> <th> failure_reason </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjCwsAGIKmQkKr-kvGPjwE </td> <td> LP6005038-DNA_C09 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005038-DNA_B03 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_F07 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_C03 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005051-DNA_F10 </td> <td> heterozygous_haplotype </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjDwsAGIIaF1_vV1IC_zAE </td> <td> LP6005144-DNA_H09 </td> <td> heterozygous_haplotype </td> </tr>
+<tr> <th> variant_id </th> <th> titv </th> <th> failure_reason </th>  </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTMY9vbsCSD1-rb0j4f9_6cB </td> <td align="right"> 1.09 </td> <td> titv_by_genomic_window </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTMYovfsCSD7tvuynrCh4Fc </td> <td align="right"> 1.09 </td> <td> titv_by_genomic_window </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTMY6vjsCSCL-d3AroH_5IEB </td> <td align="right"> 1.09 </td> <td> titv_by_genomic_window </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTMYrvrsCSDA19uqquDAsVQ </td> <td align="right"> 1.09 </td> <td> titv_by_genomic_window </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTMY4PrsCSDHie_9wOq1pJsB </td> <td align="right"> 1.09 </td> <td> titv_by_genomic_window </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIFY2hyMTMYgPvsCSCS68bysbzw1-0B </td> <td align="right"> 1.09 </td> <td> titv_by_genomic_window </td> </tr>
    </table>
 
 ## Ti/Tv By Depth
@@ -363,14 +631,30 @@ max <- 3
 min <- 1.5
 cutoffs <- list("_MAX_" = max, "_MIN_" = min)
 sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
+outputTable = 'qc_tables.titv_depth'
 result <- DisplayAndDispatchQuery(query,
                                   project=project,
-                                  replacements=c(queryReplacements, cutoffs, sortAndLimit))
+                                  replacements=c(queryReplacements, cutoffs),
+                                  outputTable)
 ```
 
 ```
+SELECT 
+  variant_id,
+  titv.titv_ratio,
+  "titv_by_depth" AS failure_reason,
+FROM(
 SELECT
-*
+  call.call_set_name AS sample_id,
+  variant_id,
+  call.DP AS depth,
+FROM(FLATTEN((
+  [va_aaa_pilot_data.all_genomes_expanded_vcfs_java3]), call.call_set_name))) AS var
+JOIN (
+SELECT
+  sample_id,
+  titv_ratio,
+  depth,
   FROM (
     SELECT
     call.call_set_name AS sample_id,
@@ -384,7 +668,6 @@ SELECT
                        'A->T', 'T->A', 'C->G', 'G->C')) AS transversions,
       call.DP,
       FROM (
-        
         SELECT
         call.call_set_name,
         CONCAT(reference_bases, CONCAT(STRING('->'), alternate_bases)) AS mutation,
@@ -420,75 +703,142 @@ SELECT
     titv_ratio,
     depth,)
 WHERE
-titv_ratio > 3 
-OR titv_ratio < 1.5
-LIMIT 1000
+titv_ratio > 3
+OR titv_ratio < 1.5) AS titv
+ON
+  var.sample_id = titv.sample_id
+  AND var.depth = titv.depth
+#_ORDER_BY_
+Running query:   RUNNING  2.0s
+Running query:   RUNNING  2.7s
+Running query:   RUNNING  3.3s
+Running query:   RUNNING  3.9s
+Running query:   RUNNING  4.6s
+Running query:   RUNNING  5.2s
+Running query:   RUNNING  5.8s
+Running query:   RUNNING  6.5s
+Running query:   RUNNING  7.1s
+Running query:   RUNNING  7.8s
+Running query:   RUNNING  8.4s
+Running query:   RUNNING  9.0s
+Running query:   RUNNING  9.7s
+Running query:   RUNNING 10.3s
+Running query:   RUNNING 10.9s
+Running query:   RUNNING 11.6s
+Running query:   RUNNING 12.3s
+Running query:   RUNNING 12.9s
+Running query:   RUNNING 13.6s
+Running query:   RUNNING 14.2s
+Running query:   RUNNING 14.9s
+Running query:   RUNNING 15.5s
+Running query:   RUNNING 16.2s
+Running query:   RUNNING 16.8s
+Running query:   RUNNING 17.4s
+Running query:   RUNNING 18.1s
+Running query:   RUNNING 18.7s
+Running query:   RUNNING 19.3s
+Running query:   RUNNING 20.0s
+Running query:   RUNNING 20.6s
+Running query:   RUNNING 21.3s
+Running query:   RUNNING 21.9s
+Running query:   RUNNING 22.5s
+Running query:   RUNNING 23.2s
+Running query:   RUNNING 23.8s
+Running query:   RUNNING 24.4s
+Running query:   RUNNING 25.1s
+Running query:   RUNNING 25.7s
+Running query:   RUNNING 26.3s
+Running query:   RUNNING 27.0s
+Running query:   RUNNING 27.6s
+Running query:   RUNNING 28.2s
+Running query:   RUNNING 28.9s
+Running query:   RUNNING 29.5s
+Running query:   RUNNING 30.1s
+Running query:   RUNNING 30.8s
+Running query:   RUNNING 31.4s
+Running query:   RUNNING 32.1s
+Running query:   RUNNING 32.7s
+Running query:   RUNNING 33.3s
+Running query:   RUNNING 34.0s
+Running query:   RUNNING 34.6s
+Running query:   RUNNING 35.2s
+Running query:   RUNNING 35.9s
+Running query:   RUNNING 36.5s
+Running query:   RUNNING 37.2s
+Running query:   RUNNING 37.8s
+Running query:   RUNNING 38.4s
+Running query:   RUNNING 39.1s
+Running query:   RUNNING 39.7s
+Running query:   RUNNING 40.4s
+Running query:   RUNNING 41.0s
+Running query:   RUNNING 41.6s
+Running query:   RUNNING 42.3s
+Running query:   RUNNING 42.9s
+Running query:   RUNNING 43.5s
+Running query:   RUNNING 44.2s
+Running query:   RUNNING 44.8s
+Running query:   RUNNING 45.4s
+Running query:   RUNNING 46.1s
+Running query:   RUNNING 46.7s
+Running query:   RUNNING 47.4s
+Running query:   RUNNING 48.0s
+Running query:   RUNNING 48.6s
+Running query:   RUNNING 49.3s
+Running query:   RUNNING 49.9s
+Running query:   RUNNING 50.5s
+Running query:   RUNNING 51.2s
+Running query:   RUNNING 51.8s
+Running query:   RUNNING 53.9s
+Running query:   RUNNING 54.5s
+Running query:   RUNNING 55.2s
+Running query:   RUNNING 55.8s
+Running query:   RUNNING 56.4s
+Running query:   RUNNING 57.1s
+Running query:   RUNNING 57.7s
+Running query:   RUNNING 58.4s
+Running query:   RUNNING 59.0s
+Running query:   RUNNING 59.7s
+Running query:   RUNNING 60.3s
+Running query:   RUNNING 60.9s
+Running query:   RUNNING 61.6s
+Running query:   RUNNING 62.2s
+Running query:   RUNNING 62.9s
+Running query:   RUNNING 63.5s
+Running query:   RUNNING 64.2s
+Running query:   RUNNING 64.8s
+Running query:   RUNNING 65.4s
+Running query:   RUNNING 66.1s
+Running query:   RUNNING 66.8s
+Running query:   RUNNING 67.4s
+Running query:   RUNNING 68.0s
+Running query:   RUNNING 68.7s
+Running query:   RUNNING 69.3s
+
+Retrieving data:  3.4s
+Retrieving data:  5.4s
+Retrieving data:  7.2s
+Retrieving data:  8.7s
+Retrieving data: 10.2s
+Retrieving data: 11.9s
+Retrieving data: 13.3s
+Retrieving data: 15.0s
 ```
 
-Number of rows returned by this query: **1000**.
+Number of rows returned by this query: **100000**.
 
 First few results
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 23:28:01 2015 -->
+<!-- Fri May 29 01:43:11 2015 -->
 <table border=1>
-<tr> <th> sample_id </th> <th> titv_ratio </th> <th> depth </th>  </tr>
-  <tr> <td> LP6005051-DNA_A11 </td> <td align="right"> 1.49 </td> <td align="right">   1 </td> </tr>
-  <tr> <td> LP6005038-DNA_C06 </td> <td align="right"> 1.47 </td> <td align="right">   6 </td> </tr>
-  <tr> <td> LP6005038-DNA_H04 </td> <td align="right"> 1.49 </td> <td align="right">   7 </td> </tr>
-  <tr> <td> LP6005038-DNA_A03 </td> <td align="right"> 1.42 </td> <td align="right">   4 </td> </tr>
-  <tr> <td> LP6005038-DNA_E05 </td> <td align="right"> 1.49 </td> <td align="right">   5 </td> </tr>
-  <tr> <td> LP6005038-DNA_E01 </td> <td align="right"> 1.41 </td> <td align="right">   3 </td> </tr>
+<tr> <th> variant_id </th> <th> titv_titv_ratio </th> <th> failure_reason </th>  </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxjp8adLILDflpnJurzi8gE </td> <td align="right"> 1.22 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxjt8adLIPn8rrXMwsiJKQ </td> <td align="right"> 1.25 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNxjt8adLIPn8rrXMwsiJKQ </td> <td align="right"> 1.49 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMxjur6YRIN-qjqbMzpW1iwE </td> <td align="right"> 1.41 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhjGgbISIObS0bvW6vHAuwE </td> <td align="right"> 1.44 </td> <td> titv_by_depth </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhjGgbISIObS0bvW6vHAuwE </td> <td align="right"> 1.43 </td> <td> titv_by_depth </td> </tr>
    </table>
 
-Generate query replacement to retreive variant ids for each sample/depth pair that is outside our cutoffs.
-
-```r
-# Format
-#  (call.call_set_name = 'LP6005692-DNA_B08' AND call.DP = 112)
-result$query = paste("(call.call_set_name = '", result$sample_id, "' AND call.DP = ", result$depth, ")", sep='')
-sampleReplacement = list("_SAMPLE_DEPTH_" = paste(result$query, collapse = ' OR '))
-```
-
-Run query to retreive all variant ids for variants failing ti/tv by depth
-
-```r
-query <- "../sql/titv-by-depth-fail-variants.sql"
-sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
-result <- DisplayAndDispatchQuery(query,
-                                  project=project,
-                                  replacements=c(queryReplacements, sampleReplacement, sortAndLimit))
-```
-
-```
-SELECT
-  variant_id,
-  call.call_set_name AS sample_id,
-  "titv_by_depth" AS failure_reason,
-FROM
-  [va_aaa_pilot_data.all_genomes_expanded_vcfs_java3]
-WHERE
-  # A list of samples and the depths of interest
-  # Example:
-  #   (call.call_set_name = 'LP6005692-DNA_B08'
-  #      AND call.DP = 112)
-  #    OR (call.call_set_name = 'LP6005692-DNA_C10'
-  #      AND call.DP = 125)
-  (call.call_set_name = 'LP6005051-DNA_A11' AND call.DP = 1) OR (call.call_set_name = 'LP6005038-DNA_C06' AND call.DP = 6) OR (call.call_set_name = 'LP6005038-DNA_H04' AND call.DP = 7) OR (call.call_set_name = 'LP6005038-DNA_A03' AND call.DP = 4) OR (call.call_set_name = 'LP6005038-DNA_E05' AND call.DP = 5) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 3) OR (call.call_set_name = 'LP6005038-DNA_H06' AND call.DP = 5) OR (call.call_set_name = 'LP6005144-DNA_C12' AND call.DP = 5) OR (call.call_set_name = 'LP6005693-DNA_E01' AND call.DP = 94) OR (call.call_set_name = 'LP6005038-DNA_C05' AND call.DP = 6) OR (call.call_set_name = 'LP6005144-DNA_A06' AND call.DP = 4) OR (call.call_set_name = 'LP6005038-DNA_E06' AND call.DP = 4) OR (call.call_set_name = 'LP6005051-DNA_C12' AND call.DP = 2) OR (call.call_set_name = 'LP6005144-DNA_C11' AND call.DP = 4) OR (call.call_set_name = 'LP6005051-DNA_F11' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_E11' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_F04' AND call.DP = 2) OR (call.call_set_name = 'LP6005038-DNA_D05' AND call.DP = 4) OR (call.call_set_name = 'LP6005051-DNA_H04' AND call.DP = 3) OR (call.call_set_name = 'LP6005144-DNA_D05' AND call.DP = 2) OR (call.call_set_name = 'LP6005144-DNA_A06' AND call.DP = 3) OR (call.call_set_name = 'LP6005051-DNA_F04' AND call.DP = 75) OR (call.call_set_name = 'LP6005692-DNA_A06' AND call.DP = 93) OR (call.call_set_name = 'LP6005144-DNA_A08' AND call.DP = 68) OR (call.call_set_name = 'LP6005144-DNA_C09' AND call.DP = 77) OR (call.call_set_name = 'LP6005692-DNA_B12' AND call.DP = 100) OR (call.call_set_name = 'LP6005051-DNA_E10' AND call.DP = 86) OR (call.call_set_name = 'LP6005693-DNA_B01' AND call.DP = 115) OR (call.call_set_name = 'LP6005692-DNA_D06' AND call.DP = 98) OR (call.call_set_name = 'LP6005144-DNA_E11' AND call.DP = 95) OR (call.call_set_name = 'LP6005051-DNA_A03' AND call.DP = 104) OR (call.call_set_name = 'LP6005144-DNA_H03' AND call.DP = 94) OR (call.call_set_name = 'LP6005051-DNA_B04' AND call.DP = 90) OR (call.call_set_name = 'LP6005144-DNA_H04' AND call.DP = 81) OR (call.call_set_name = 'LP6005144-DNA_H05' AND call.DP = 102) OR (call.call_set_name = 'LP6005051-DNA_G06' AND call.DP = 84) OR (call.call_set_name = 'LP6005692-DNA_G02' AND call.DP = 93) OR (call.call_set_name = 'LP6005243-DNA_C08' AND call.DP = 95) OR (call.call_set_name = 'LP6005038-DNA_D06' AND call.DP = 85) OR (call.call_set_name = 'LP6005243-DNA_A02' AND call.DP = 86) OR (call.call_set_name = 'LP6005038-DNA_D04' AND call.DP = 105) OR (call.call_set_name = 'LP6005038-DNA_B08' AND call.DP = 126) OR (call.call_set_name = 'LP6005692-DNA_F03' AND call.DP = 78) OR (call.call_set_name = 'LP6005243-DNA_D02' AND call.DP = 85) OR (call.call_set_name = 'LP6005038-DNA_B05' AND call.DP = 83) OR (call.call_set_name = 'LP6005144-DNA_C08' AND call.DP = 63) OR (call.call_set_name = 'LP6005243-DNA_D01' AND call.DP = 93) OR (call.call_set_name = 'LP6005144-DNA_E05' AND call.DP = 96) OR (call.call_set_name = 'LP6005144-DNA_F08' AND call.DP = 67) OR (call.call_set_name = 'LP6005051-DNA_C06' AND call.DP = 77) OR (call.call_set_name = 'LP6005243-DNA_H07' AND call.DP = 87) OR (call.call_set_name = 'LP6005692-DNA_E01' AND call.DP = 82) OR (call.call_set_name = 'LP6005144-DNA_H09' AND call.DP = 81) OR (call.call_set_name = 'LP6005038-DNA_H08' AND call.DP = 85) OR (call.call_set_name = 'LP6005051-DNA_A12' AND call.DP = 84) OR (call.call_set_name = 'LP6005243-DNA_C10' AND call.DP = 83) OR (call.call_set_name = 'LP6005051-DNA_A07' AND call.DP = 96) OR (call.call_set_name = 'LP6005038-DNA_E07' AND call.DP = 84) OR (call.call_set_name = 'LP6005692-DNA_E07' AND call.DP = 81) OR (call.call_set_name = 'LP6005692-DNA_A05' AND call.DP = 73) OR (call.call_set_name = 'LP6005051-DNA_A03' AND call.DP = 76) OR (call.call_set_name = 'LP6005144-DNA_C11' AND call.DP = 7) OR (call.call_set_name = 'LP6005038-DNA_C03' AND call.DP = 2) OR (call.call_set_name = 'LP6005038-DNA_D06' AND call.DP = 4) OR (call.call_set_name = 'LP6005144-DNA_C09' AND call.DP = 5) OR (call.call_set_name = 'LP6005051-DNA_H11' AND call.DP = 3) OR (call.call_set_name = 'LP6005051-DNA_B11' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_A06' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_B04' AND call.DP = 4) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 5) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 250) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 244) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 242) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 248) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 245) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 249) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 245) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 244) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 247) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 249) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 219) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 170) OR (call.call_set_name = 'LP6005051-DNA_F03' AND call.DP = 102) OR (call.call_set_name = 'LP6005144-DNA_D10' AND call.DP = 105) OR (call.call_set_name = 'LP6005243-DNA_C02' AND call.DP = 92) OR (call.call_set_name = 'LP6005051-DNA_G03' AND call.DP = 86) OR (call.call_set_name = 'LP6005243-DNA_G04' AND call.DP = 106) OR (call.call_set_name = 'LP6005051-DNA_F05' AND call.DP = 87) OR (call.call_set_name = 'LP6005144-DNA_H11' AND call.DP = 97) OR (call.call_set_name = 'LP6005692-DNA_G05' AND call.DP = 101) OR (call.call_set_name = 'LP6005692-DNA_G06' AND call.DP = 101) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 161) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 207) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 229) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 250) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 193) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 204) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 212) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 224) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 187) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 209) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 105) OR (call.call_set_name = 'LP6005693-DNA_B01' AND call.DP = 121) OR (call.call_set_name = 'LP6005144-DNA_D01' AND call.DP = 105) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 155) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 159) OR (call.call_set_name = 'LP6005144-DNA_F12' AND call.DP = 110) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 97) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 168) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 187) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 111) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 223) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 139) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 242) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 153) OR (call.call_set_name = 'LP6005243-DNA_B05' AND call.DP = 97) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 231) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 125) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 228) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 126) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 182) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 169) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 126) OR (call.call_set_name = 'LP6005051-DNA_E08' AND call.DP = 74) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 127) OR (call.call_set_name = 'LP6005038-DNA_D07' AND call.DP = 109) OR (call.call_set_name = 'LP6005038-DNA_E02' AND call.DP = 128) OR (call.call_set_name = 'LP6005038-DNA_E03' AND call.DP = 176) OR (call.call_set_name = 'LP6005144-DNA_D10' AND call.DP = 85) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 77) OR (call.call_set_name = 'LP6005692-DNA_G10' AND call.DP = 99) OR (call.call_set_name = 'LP6005051-DNA_F01' AND call.DP = 77) OR (call.call_set_name = 'LP6005144-DNA_B01' AND call.DP = 71) OR (call.call_set_name = 'LP6005144-DNA_C12' AND call.DP = 1) OR (call.call_set_name = 'LP6005038-DNA_G04' AND call.DP = 104) OR (call.call_set_name = 'LP6005051-DNA_E04' AND call.DP = 77) OR (call.call_set_name = 'LP6005038-DNA_E03' AND call.DP = 101) OR (call.call_set_name = 'LP6005051-DNA_G03' AND call.DP = 94) OR (call.call_set_name = 'LP6005144-DNA_G10' AND call.DP = 108) OR (call.call_set_name = 'LP6005038-DNA_E03' AND call.DP = 5) OR (call.call_set_name = 'LP6005038-DNA_G06' AND call.DP = 5) OR (call.call_set_name = 'LP6005038-DNA_A03' AND call.DP = 5) OR (call.call_set_name = 'LP6005144-DNA_C11' AND call.DP = 5) OR (call.call_set_name = 'LP6005038-DNA_B03' AND call.DP = 5) OR (call.call_set_name = 'LP6005038-DNA_F06' AND call.DP = 4) OR (call.call_set_name = 'LP6005051-DNA_B04' AND call.DP = 3) OR (call.call_set_name = 'LP6005144-DNA_H05' AND call.DP = 5) OR (call.call_set_name = 'LP6005144-DNA_H04' AND call.DP = 4) OR (call.call_set_name = 'LP6005051-DNA_A04' AND call.DP = 2) OR (call.call_set_name = 'LP6005038-DNA_H03' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_D11' AND call.DP = 1) OR (call.call_set_name = 'LP6005243-DNA_F08' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_E05' AND call.DP = 77) OR (call.call_set_name = 'LP6005051-DNA_D03' AND call.DP = 74) OR (call.call_set_name = 'LP6005243-DNA_D02' AND call.DP = 82) OR (call.call_set_name = 'LP6005051-DNA_G12' AND call.DP = 75) OR (call.call_set_name = 'LP6005051-DNA_B12' AND call.DP = 73) OR (call.call_set_name = 'LP6005051-DNA_E06' AND call.DP = 103) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 104) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 103) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 80) OR (call.call_set_name = 'LP6005243-DNA_C02' AND call.DP = 83) OR (call.call_set_name = 'LP6005038-DNA_F05' AND call.DP = 66) OR (call.call_set_name = 'LP6005051-DNA_E11' AND call.DP = 67) OR (call.call_set_name = 'LP6005038-DNA_A03' AND call.DP = 74) OR (call.call_set_name = 'LP6005038-DNA_F11' AND call.DP = 71) OR (call.call_set_name = 'LP6005038-DNA_F01' AND call.DP = 84) OR (call.call_set_name = 'LP6005038-DNA_D08' AND call.DP = 92) OR (call.call_set_name = 'LP6005038-DNA_D09' AND call.DP = 70) OR (call.call_set_name = 'LP6005243-DNA_A06' AND call.DP = 92) OR (call.call_set_name = 'LP6005692-DNA_C12' AND call.DP = 88) OR (call.call_set_name = 'LP6005144-DNA_A09' AND call.DP = 73) OR (call.call_set_name = 'LP6005243-DNA_G08' AND call.DP = 1) OR (call.call_set_name = 'LP6005243-DNA_C10' AND call.DP = 1) OR (call.call_set_name = 'LP6005692-DNA_H06' AND call.DP = 1) OR (call.call_set_name = 'LP6005038-DNA_G01' AND call.DP = 5) OR (call.call_set_name = 'LP6005144-DNA_B09' AND call.DP = 4) OR (call.call_set_name = 'LP6005051-DNA_B04' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_D12' AND call.DP = 1) OR (call.call_set_name = 'LP6005038-DNA_B03' AND call.DP = 4) OR (call.call_set_name = 'LP6005038-DNA_G04' AND call.DP = 6) OR (call.call_set_name = 'LP6005038-DNA_F03' AND call.DP = 4) OR (call.call_set_name = 'LP6005144-DNA_H01' AND call.DP = 72) OR (call.call_set_name = 'LP6005038-DNA_G03' AND call.DP = 5) OR (call.call_set_name = 'LP6005144-DNA_B12' AND call.DP = 5) OR (call.call_set_name = 'LP6005038-DNA_B03' AND call.DP = 3) OR (call.call_set_name = 'LP6005144-DNA_E07' AND call.DP = 5) OR (call.call_set_name = 'LP6005144-DNA_B12' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_A10' AND call.DP = 1) OR (call.call_set_name = 'LP6005144-DNA_B04' AND call.DP = 2) OR (call.call_set_name = 'LP6005038-DNA_B03' AND call.DP = 1) OR (call.call_set_name = 'LP6005243-DNA_A04' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_C04' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_B11' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_C06' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_H11' AND call.DP = 1) OR (call.call_set_name = 'LP6005243-DNA_G03' AND call.DP = 1) OR (call.call_set_name = 'LP6005038-DNA_G03' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_D10' AND call.DP = 1) OR (call.call_set_name = 'LP6005038-DNA_C03' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_B06' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_H10' AND call.DP = 1) OR (call.call_set_name = 'LP6005038-DNA_G06' AND call.DP = 4) OR (call.call_set_name = 'LP6005051-DNA_A12' AND call.DP = 2) OR (call.call_set_name = 'LP6005144-DNA_C11' AND call.DP = 3) OR (call.call_set_name = 'LP6005038-DNA_H06' AND call.DP = 4) OR (call.call_set_name = 'LP6005051-DNA_B04' AND call.DP = 1) OR (call.call_set_name = 'LP6005051-DNA_C11' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_D06' AND call.DP = 3) OR (call.call_set_name = 'LP6005144-DNA_B12' AND call.DP = 3) OR (call.call_set_name = 'LP6005144-DNA_B09' AND call.DP = 2) OR (call.call_set_name = 'LP6005038-DNA_H04' AND call.DP = 5) OR (call.call_set_name = 'LP6005038-DNA_H03' AND call.DP = 2) OR (call.call_set_name = 'LP6005038-DNA_E03' AND call.DP = 2) OR (call.call_set_name = 'LP6005051-DNA_C04' AND call.DP = 3) OR (call.call_set_name = 'LP6005144-DNA_H08' AND call.DP = 4) OR (call.call_set_name = 'LP6005243-DNA_F09' AND call.DP = 107) OR (call.call_set_name = 'LP6005038-DNA_B10' AND call.DP = 93) OR (call.call_set_name = 'LP6005692-DNA_G02' AND call.DP = 85) OR (call.call_set_name = 'LP6005038-DNA_H12' AND call.DP = 116) OR (call.call_set_name = 'LP6005144-DNA_H09' AND call.DP = 119) OR (call.call_set_name = 'LP6005051-DNA_G05' AND call.DP = 74) OR (call.call_set_name = 'LP6005243-DNA_D11' AND call.DP = 92) OR (call.call_set_name = 'LP6005692-DNA_A05' AND call.DP = 91) OR (call.call_set_name = 'LP6005144-DNA_D08' AND call.DP = 115) OR (call.call_set_name = 'LP6005051-DNA_G04' AND call.DP = 71) OR (call.call_set_name = 'LP6005051-DNA_D05' AND call.DP = 123) OR (call.call_set_name = 'LP6005038-DNA_A10' AND call.DP = 79) OR (call.call_set_name = 'LP6005243-DNA_E04' AND call.DP = 133) OR (call.call_set_name = 'LP6005243-DNA_F10' AND call.DP = 107) OR (call.call_set_name = 'LP6005051-DNA_B10' AND call.DP = 97) OR (call.call_set_name = 'LP6005038-DNA_H09' AND call.DP = 107) OR (call.call_set_name = 'LP6005243-DNA_F03' AND call.DP = 117) OR (call.call_set_name = 'LP6005051-DNA_B09' AND call.DP = 106) OR (call.call_set_name = 'LP6005038-DNA_E05' AND call.DP = 114) OR (call.call_set_name = 'LP6005693-DNA_B01' AND call.DP = 154) OR (call.call_set_name = 'LP6005144-DNA_E11' AND call.DP = 118) OR (call.call_set_name = 'LP6005243-DNA_C08' AND call.DP = 119) OR (call.call_set_name = 'LP6005051-DNA_E01' AND call.DP = 108) OR (call.call_set_name = 'LP6005144-DNA_D12' AND call.DP = 108) OR (call.call_set_name = 'LP6005144-DNA_G11' AND call.DP = 82) OR (call.call_set_name = 'LP6005693-DNA_A01' AND call.DP = 155) OR (call.call_set_name = 'LP6005144-DNA_G12' AND call.DP = 122) OR (call.call_set_name = 'LP6005051-DNA_F10' AND call.DP = 116) OR (call.call_set_name = 'LP6005144-DNA_H06' AND call.DP = 96) OR (call.call_set_name = 'LP6005038-DNA_A12' AND call.DP = 110) OR (call.call_set_name = 'LP6005051-DNA_C03' AND call.DP = 117) OR (call.call_set_name = 'LP6005051-DNA_B12' AND call.DP = 72) OR (call.call_set_name = 'LP6005038-DNA_C07' AND call.DP = 84) OR (call.call_set_name = 'LP6005692-DNA_A06' AND call.DP = 151) OR (call.call_set_name = 'LP6005243-DNA_G01' AND call.DP = 148) OR (call.call_set_name = 'LP6005243-DNA_D04' AND call.DP = 111) OR (call.call_set_name = 'LP6005243-DNA_H07' AND call.DP = 112) OR (call.call_set_name = 'LP6005144-DNA_D11' AND call.DP = 145) OR (call.call_set_name = 'LP6005243-DNA_E08' AND call.DP = 91) OR (call.call_set_name = 'LP6005051-DNA_G09' AND call.DP = 88) OR (call.call_set_name = 'LP6005243-DNA_F07' AND call.DP = 102) OR (call.call_set_name = 'LP6005692-DNA_D10' AND call.DP = 143) OR (call.call_set_name = 'LP6005038-DNA_G12' AND call.DP = 152) OR (call.call_set_name = 'LP6005038-DNA_D09' AND call.DP = 103) OR (call.call_set_name = 'LP6005144-DNA_C09' AND call.DP = 107) OR (call.call_set_name = 'LP6005038-DNA_H12' AND call.DP = 107) OR (call.call_set_name = 'LP6005051-DNA_F12' AND call.DP = 138) OR (call.call_set_name = 'LP6005038-DNA_F07' AND call.DP = 115) OR (call.call_set_name = 'LP6005692-DNA_F03' AND call.DP = 117) OR (call.call_set_name = 'LP6005692-DNA_E06' AND call.DP = 155) OR (call.call_set_name = 'LP6005144-DNA_E05' AND call.DP = 104) OR (call.call_set_name = 'LP6005144-DNA_H03' AND call.DP = 134) OR (call.call_set_name = 'LP6005038-DNA_A05' AND call.DP = 108) OR (call.call_set_name = 'LP6005692-DNA_D01' AND call.DP = 151) OR (call.call_set_name = 'LP6005144-DNA_E11' AND call.DP = 141) OR (call.call_set_name = 'LP6005038-DNA_E12' AND call.DP = 139) OR (call.call_set_name = 'LP6005144-DNA_B04' AND call.DP = 76) OR (call.call_set_name = 'LP6005038-DNA_G10' AND call.DP = 113) OR (call.call_set_name = 'LP6005038-DNA_H04' AND call.DP = 116) OR (call.call_set_name = 'LP6005144-DNA_F07' AND call.DP = 162) OR (call.call_set_name = 'LP6005038-DNA_C08' AND call.DP = 157) OR (call.call_set_name = 'LP6005144-DNA_C07' AND call.DP = 120) OR (call.call_set_name = 'LP6005038-DNA_B06' AND call.DP = 149) OR (call.call_set_name = 'LP6005692-DNA_F01' AND call.DP = 178) OR (call.call_set_name = 'LP6005051-DNA_A06' AND call.DP = 141) OR (call.call_set_name = 'LP6005692-DNA_F06' AND call.DP = 118) OR (call.call_set_name = 'LP6005144-DNA_B09' AND call.DP = 104) OR (call.call_set_name = 'LP6005051-DNA_E07' AND call.DP = 108) OR (call.call_set_name = 'LP6005038-DNA_D07' AND call.DP = 86) OR (call.call_set_name = 'LP6005692-DNA_D07' AND call.DP = 133) OR (call.call_set_name = 'LP6005144-DNA_D05' AND call.DP = 165) OR (call.call_set_name = 'LP6005144-DNA_D07' AND call.DP = 135) OR (call.call_set_name = 'LP6005144-DNA_G11' AND call.DP = 80) OR (call.call_set_name = 'LP6005144-DNA_C02' AND call.DP = 99) OR (call.call_set_name = 'LP6005693-DNA_C01' AND call.DP = 137) OR (call.call_set_name = 'LP6005243-DNA_E06' AND call.DP = 99) OR (call.call_set_name = 'LP6005051-DNA_F08' AND call.DP = 97) OR (call.call_set_name = 'LP6005051-DNA_C07' AND call.DP = 105) OR (call.call_set_name = 'LP6005038-DNA_B04' AND call.DP = 179) OR (call.call_set_name = 'LP6005038-DNA_A10' AND call.DP = 77) OR (call.call_set_name = 'LP6005051-DNA_C06' AND call.DP = 159) OR (call.call_set_name = 'LP6005038-DNA_G10' AND call.DP = 124) OR (call.call_set_name = 'LP6005051-DNA_E09' AND call.DP = 104) OR (call.call_set_name = 'LP6005038-DNA_A06' AND call.DP = 175) OR (call.call_set_name = 'LP6005038-DNA_H03' AND call.DP = 129) OR (call.call_set_name = 'LP6005051-DNA_A11' AND call.DP = 124) OR (call.call_set_name = 'LP6005243-DNA_H05' AND call.DP = 118) OR (call.call_set_name = 'LP6005692-DNA_F04' AND call.DP = 127) OR (call.call_set_name = 'LP6005038-DNA_A11' AND call.DP = 115) OR (call.call_set_name = 'LP6005243-DNA_E05' AND call.DP = 151) OR (call.call_set_name = 'LP6005051-DNA_B11' AND call.DP = 139) OR (call.call_set_name = 'LP6005038-DNA_F03' AND call.DP = 82) OR (call.call_set_name = 'LP6005243-DNA_C10' AND call.DP = 137) OR (call.call_set_name = 'LP6005243-DNA_F08' AND call.DP = 114) OR (call.call_set_name = 'LP6005693-DNA_A02' AND call.DP = 103) OR (call.call_set_name = 'LP6005144-DNA_C10' AND call.DP = 110) OR (call.call_set_name = 'LP6005692-DNA_E08' AND call.DP = 125) OR (call.call_set_name = 'LP6005692-DNA_C07' AND call.DP = 99) OR (call.call_set_name = 'LP6005692-DNA_E07' AND call.DP = 99) OR (call.call_set_name = 'LP6005144-DNA_B10' AND call.DP = 137) OR (call.call_set_name = 'LP6005051-DNA_D10' AND call.DP = 72) OR (call.call_set_name = 'LP6005144-DNA_B12' AND call.DP = 157) OR (call.call_set_name = 'LP6005243-DNA_A05' AND call.DP = 98) OR (call.call_set_name = 'LP6005051-DNA_H10' AND call.DP = 103) OR (call.call_set_name = 'LP6005038-DNA_G01' AND call.DP = 90) OR (call.call_set_name = 'LP6005692-DNA_B09' AND call.DP = 90) OR (call.call_set_name = 'LP6005144-DNA_C12' AND call.DP = 103) OR (call.call_set_name = 'LP6005051-DNA_B11' AND call.DP = 134) OR (call.call_set_name = 'LP6005243-DNA_F06' AND call.DP = 151) OR (call.call_set_name = 'LP6005692-DNA_C12' AND call.DP = 141) OR (call.call_set_name = 'LP6005051-DNA_H05' AND call.DP = 91) OR (call.call_set_name = 'LP6005051-DNA_E08' AND call.DP = 142) OR (call.call_set_name = 'LP6005692-DNA_E06' AND call.DP = 142) OR (call.call_set_name = 'LP6005038-DNA_F03' AND call.DP = 79) OR (call.call_set_name = 'LP6005243-DNA_G03' AND call.DP = 153) OR (call.call_set_name = 'LP6005243-DNA_H02' AND call.DP = 124) OR (call.call_set_name = 'LP6005243-DNA_A07' AND call.DP = 108) OR (call.call_set_name = 'LP6005051-DNA_E07' AND call.DP = 109) OR (call.call_set_name = 'LP6005051-DNA_B01' AND call.DP = 97) OR (call.call_set_name = 'LP6005243-DNA_H10' AND call.DP = 100) OR (call.call_set_name = 'LP6005243-DNA_C11' AND call.DP = 81) OR (call.call_set_name = 'LP6005038-DNA_E07' AND call.DP = 100) OR (call.call_set_name = 'LP6005051-DNA_A06' AND call.DP = 137) OR (call.call_set_name = 'LP6005051-DNA_A08' AND call.DP = 105) OR (call.call_set_name = 'LP6005243-DNA_C06' AND call.DP = 161) OR (call.call_set_name = 'LP6005144-DNA_H08' AND call.DP = 121) OR (call.call_set_name = 'LP6005038-DNA_E11' AND call.DP = 110) OR (call.call_set_name = 'LP6005243-DNA_A11' AND call.DP = 143) OR (call.call_set_name = 'LP6005144-DNA_H05' AND call.DP = 152) OR (call.call_set_name = 'LP6005051-DNA_E03' AND call.DP = 164) OR (call.call_set_name = 'LP6005144-DNA_D01' AND call.DP = 168) OR (call.call_set_name = 'LP6005144-DNA_G05' AND call.DP = 166) OR (call.call_set_name = 'LP6005038-DNA_A09' AND call.DP = 146) OR (call.call_set_name = 'LP6005051-DNA_B09' AND call.DP = 109) OR (call.call_set_name = 'LP6005692-DNA_C09' AND call.DP = 103) OR (call.call_set_name = 'LP6005243-DNA_A04' AND call.DP = 125) OR (call.call_set_name = 'LP6005051-DNA_H03' AND call.DP = 190) OR (call.call_set_name = 'LP6005051-DNA_G05' AND call.DP = 79) OR (call.call_set_name = 'LP6005038-DNA_C07' AND call.DP = 99) OR (call.call_set_name = 'LP6005692-DNA_H07' AND call.DP = 121) OR (call.call_set_name = 'LP6005144-DNA_A03' AND call.DP = 130) OR (call.call_set_name = 'LP6005038-DNA_D07' AND call.DP = 93) OR (call.call_set_name = 'LP6005692-DNA_C09' AND call.DP = 121) OR (call.call_set_name = 'LP6005243-DNA_D10' AND call.DP = 131) OR (call.call_set_name = 'LP6005038-DNA_H12' AND call.DP = 132) OR (call.call_set_name = 'LP6005144-DNA_B10' AND call.DP = 146) OR (call.call_set_name = 'LP6005038-DNA_E04' AND call.DP = 155) OR (call.call_set_name = 'LP6005038-DNA_C09' AND call.DP = 170) OR (call.call_set_name = 'LP6005692-DNA_E07' AND call.DP = 135) OR (call.call_set_name = 'LP6005051-DNA_F04' AND call.DP = 119) OR (call.call_set_name = 'LP6005038-DNA_C09' AND call.DP = 176) OR (call.call_set_name = 'LP6005692-DNA_E09' AND call.DP = 87) OR (call.call_set_name = 'LP6005692-DNA_E08' AND call.DP = 121) OR (call.call_set_name = 'LP6005144-DNA_B04' AND call.DP = 77) OR (call.call_set_name = 'LP6005243-DNA_B07' AND call.DP = 75) OR (call.call_set_name = 'LP6005692-DNA_H09' AND call.DP = 109) OR (call.call_set_name = 'LP6005243-DNA_E01' AND call.DP = 127) OR (call.call_set_name = 'LP6005144-DNA_B04' AND call.DP = 70) OR (call.call_set_name = 'LP6005051-DNA_D06' AND call.DP = 65) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 106) OR (call.call_set_name = 'LP6005051-DNA_C04' AND call.DP = 110) OR (call.call_set_name = 'LP6005051-DNA_B08' AND call.DP = 124) OR (call.call_set_name = 'LP6005038-DNA_H09' AND call.DP = 111) OR (call.call_set_name = 'LP6005243-DNA_C05' AND call.DP = 94) OR (call.call_set_name = 'LP6005243-DNA_F10' AND call.DP = 121) OR (call.call_set_name = 'LP6005051-DNA_A11' AND call.DP = 134) OR (call.call_set_name = 'LP6005693-DNA_A03' AND call.DP = 85) OR (call.call_set_name = 'LP6005038-DNA_H06' AND call.DP = 125) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 144) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 115) OR (call.call_set_name = 'LP6005038-DNA_F08' AND call.DP = 164) OR (call.call_set_name = 'LP6005144-DNA_B10' AND call.DP = 171) OR (call.call_set_name = 'LP6005692-DNA_F03' AND call.DP = 155) OR (call.call_set_name = 'LP6005692-DNA_F04' AND call.DP = 174) OR (call.call_set_name = 'LP6005051-DNA_G09' AND call.DP = 176) OR (call.call_set_name = 'LP6005038-DNA_H06' AND call.DP = 148) OR (call.call_set_name = 'LP6005692-DNA_F09' AND call.DP = 145) OR (call.call_set_name = 'LP6005243-DNA_F02' AND call.DP = 182) OR (call.call_set_name = 'LP6005144-DNA_E09' AND call.DP = 100) OR (call.call_set_name = 'LP6005243-DNA_F07' AND call.DP = 158) OR (call.call_set_name = 'LP6005038-DNA_G03' AND call.DP = 120) OR (call.call_set_name = 'LP6005038-DNA_C09' AND call.DP = 179) OR (call.call_set_name = 'LP6005051-DNA_B05' AND call.DP = 148) OR (call.call_set_name = 'LP6005243-DNA_B04' AND call.DP = 139) OR (call.call_set_name = 'LP6005051-DNA_C02' AND call.DP = 103) OR (call.call_set_name = 'LP6005051-DNA_D05' AND call.DP = 177) OR (call.call_set_name = 'LP6005038-DNA_F07' AND call.DP = 143) OR (call.call_set_name = 'LP6005243-DNA_C02' AND call.DP = 122) OR (call.call_set_name = 'LP6005051-DNA_B10' AND call.DP = 152) OR (call.call_set_name = 'LP6005144-DNA_H08' AND call.DP = 159) OR (call.call_set_name = 'LP6005051-DNA_A10' AND call.DP = 154) OR (call.call_set_name = 'LP6005051-DNA_E08' AND call.DP = 220) OR (call.call_set_name = 'LP6005243-DNA_A10' AND call.DP = 108) OR (call.call_set_name = 'LP6005243-DNA_G02' AND call.DP = 133) OR (call.call_set_name = 'LP6005051-DNA_G05' AND call.DP = 117) OR (call.call_set_name = 'LP6005051-DNA_H12' AND call.DP = 126) OR (call.call_set_name = 'LP6005051-DNA_E03' AND call.DP = 225) OR (call.call_set_name = 'LP6005051-DNA_C04' AND call.DP = 146) OR (call.call_set_name = 'LP6005038-DNA_A07' AND call.DP = 104) OR (call.call_set_name = 'LP6005144-DNA_H06' AND call.DP = 144) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 151) OR (call.call_set_name = 'LP6005051-DNA_B06' AND call.DP = 182) OR (call.call_set_name = 'LP6005038-DNA_E09' AND call.DP = 105) OR (call.call_set_name = 'LP6005243-DNA_E06' AND call.DP = 121) OR (call.call_set_name = 'LP6005243-DNA_D09' AND call.DP = 115) OR (call.call_set_name = 'LP6005051-DNA_F09' AND call.DP = 93) OR (call.call_set_name = 'LP6005051-DNA_B11' AND call.DP = 179) OR (call.call_set_name = 'LP6005038-DNA_B06' AND call.DP = 159) OR (call.call_set_name = 'LP6005243-DNA_D05' AND call.DP = 112) OR (call.call_set_name = 'LP6005038-DNA_H04' AND call.DP = 142) OR (call.call_set_name = 'LP6005038-DNA_F02' AND call.DP = 136) OR (call.call_set_name = 'LP6005038-DNA_E04' AND call.DP = 175) OR (call.call_set_name = 'LP6005051-DNA_B01' AND call.DP = 122) OR (call.call_set_name = 'LP6005692-DNA_E11' AND call.DP = 151) OR (call.call_set_name = 'LP6005038-DNA_B08' AND call.DP = 129) OR (call.call_set_name = 'LP6005038-DNA_B05' AND call.DP = 151) OR (call.call_set_name = 'LP6005692-DNA_F11' AND call.DP = 168) OR (call.call_set_name = 'LP6005051-DNA_G06' AND call.DP = 103) OR (call.call_set_name = 'LP6005144-DNA_G04' AND call.DP = 152) OR (call.call_set_name = 'LP6005144-DNA_D07' AND call.DP = 189) OR (call.call_set_name = 'LP6005692-DNA_F01' AND call.DP = 207) OR (call.call_set_name = 'LP6005144-DNA_G10' AND call.DP = 99) OR (call.call_set_name = 'LP6005243-DNA_H08' AND call.DP = 154) OR (call.call_set_name = 'LP6005144-DNA_B10' AND call.DP = 152) OR (call.call_set_name = 'LP6005243-DNA_A05' AND call.DP = 120) OR (call.call_set_name = 'LP6005038-DNA_E12' AND call.DP = 149) OR (call.call_set_name = 'LP6005051-DNA_G09' AND call.DP = 159) OR (call.call_set_name = 'LP6005144-DNA_H12' AND call.DP = 115) OR (call.call_set_name = 'LP6005038-DNA_B11' AND call.DP = 144) OR (call.call_set_name = 'LP6005051-DNA_B01' AND call.DP = 109) OR (call.call_set_name = 'LP6005038-DNA_B05' AND call.DP = 142) OR (call.call_set_name = 'LP6005038-DNA_H04' AND call.DP = 129) OR (call.call_set_name = 'LP6005051-DNA_B05' AND call.DP = 114) OR (call.call_set_name = 'LP6005693-DNA_A01' AND call.DP = 196) OR (call.call_set_name = 'LP6005144-DNA_H07' AND call.DP = 167) OR (call.call_set_name = 'LP6005692-DNA_F01' AND call.DP = 195) OR (call.call_set_name = 'LP6005692-DNA_F04' AND call.DP = 154) OR (call.call_set_name = 'LP6005692-DNA_E12' AND call.DP = 167) OR (call.call_set_name = 'LP6005243-DNA_B09' AND call.DP = 167) OR (call.call_set_name = 'LP6005038-DNA_H08' AND call.DP = 170) OR (call.call_set_name = 'LP6005243-DNA_C10' AND call.DP = 153) OR (call.call_set_name = 'LP6005692-DNA_E11' AND call.DP = 153) OR (call.call_set_name = 'LP6005692-DNA_B08' AND call.DP = 159) OR (call.call_set_name = 'LP6005038-DNA_F10' AND call.DP = 109) OR (call.call_set_name = 'LP6005038-DNA_G03' AND call.DP = 106) OR (call.call_set_name = 'LP6005144-DNA_D11' AND call.DP = 172) OR (call.call_set_name = 'LP6005051-DNA_E08' AND call.DP = 207) OR (call.call_set_name = 'LP6005144-DNA_H09' AND call.DP = 169) OR (call.call_set_name = 'LP6005243-DNA_E07' AND call.DP = 112) OR (call.call_set_name = 'LP6005038-DNA_E04' AND call.DP = 181) OR (call.call_set_name = 'LP6005243-DNA_G02' AND call.DP = 117) OR (call.call_set_name = 'LP6005038-DNA_D02' AND call.DP = 171) OR (call.call_set_name = 'LP6005243-DNA_F03' AND call.DP = 133) OR (call.call_set_name = 'LP6005051-DNA_A06' AND call.DP = 159) OR (call.call_set_name = 'LP6005038-DNA_D09' AND call.DP = 108) OR (call.call_set_name = 'LP6005051-DNA_D11' AND call.DP = 113) OR (call.call_set_name = 'LP6005243-DNA_A09' AND call.DP = 162) OR (call.call_set_name = 'LP6005692-DNA_F02' AND call.DP = 136) OR (call.call_set_name = 'LP6005144-DNA_B11' AND call.DP = 123) OR (call.call_set_name = 'LP6005038-DNA_G10' AND call.DP = 167) OR (call.call_set_name = 'LP6005144-DNA_H11' AND call.DP = 126) OR (call.call_set_name = 'LP6005051-DNA_B09' AND call.DP = 148) OR (call.call_set_name = 'LP6005144-DNA_D06' AND call.DP = 125) OR (call.call_set_name = 'LP6005144-DNA_C12' AND call.DP = 101) OR (call.call_set_name = 'LP6005144-DNA_C09' AND call.DP = 125) OR (call.call_set_name = 'LP6005144-DNA_G02' AND call.DP = 132) OR (call.call_set_name = 'LP6005038-DNA_E06' AND call.DP = 141) OR (call.call_set_name = 'LP6005692-DNA_G04' AND call.DP = 126) OR (call.call_set_name = 'LP6005038-DNA_E02' AND call.DP = 201) OR (call.call_set_name = 'LP6005243-DNA_F10' AND call.DP = 133) OR (call.call_set_name = 'LP6005243-DNA_A06' AND call.DP = 115) OR (call.call_set_name = 'LP6005243-DNA_F08' AND call.DP = 129) OR (call.call_set_name = 'LP6005051-DNA_G08' AND call.DP = 96) OR (call.call_set_name = 'LP6005692-DNA_A03' AND call.DP = 136) OR (call.call_set_name = 'LP6005051-DNA_F09' AND call.DP = 80) OR (call.call_set_name = 'LP6005692-DNA_F09' AND call.DP = 115) OR (call.call_set_name = 'LP6005243-DNA_A10' AND call.DP = 78) OR (call.call_set_name = 'LP6005038-DNA_C03' AND call.DP = 88) OR (call.call_set_name = 'LP6005051-DNA_G02' AND call.DP = 133) OR (call.call_set_name = 'LP6005051-DNA_G06' AND call.DP = 98) OR (call.call_set_name = 'LP6005051-DNA_F07' AND call.DP = 74) OR (call.call_set_name = 'LP6005038-DNA_G02' AND call.DP = 115) OR (call.call_set_name = 'LP6005051-DNA_B03' AND call.DP = 84) OR (call.call_set_name = 'LP6005243-DNA_E08' AND call.DP = 116) OR (call.call_set_name = 'LP6005038-DNA_E05' AND call.DP = 173) OR (call.call_set_name = 'LP6005243-DNA_A05' AND call.DP = 118) OR (call.call_set_name = 'LP6005051-DNA_H07' AND call.DP = 132) OR (call.call_set_name = 'LP6005038-DNA_A11' AND call.DP = 156) OR (call.call_set_name = 'LP6005243-DNA_H09' AND call.DP = 150) OR (call.call_set_name = 'LP6005038-DNA_E11' AND call.DP = 120) OR (call.call_set_name = 'LP6005144-DNA_B07' AND call.DP = 101) OR (call.call_set_name = 'LP6005144-DNA_F11' AND call.DP = 167) OR (call.call_set_name = 'LP6005051-DNA_H12' AND call.DP = 106) OR (call.call_set_name = 'LP6005051-DNA_G07' AND call.DP = 138) OR (call.call_set_name = 'LP6005038-DNA_A03' AND call.DP = 161) OR (call.call_set_name = 'LP6005051-DNA_E12' AND call.DP = 109) OR (call.call_set_name = 'LP6005692-DNA_C12' AND call.DP = 173) OR (call.call_set_name = 'LP6005051-DNA_C02' AND call.DP = 77) OR (call.call_set_name = 'LP6005038-DNA_H12' AND call.DP = 123) OR (call.call_set_name = 'LP6005144-DNA_H01' AND call.DP = 97) OR (call.call_set_name = 'LP6005038-DNA_B04' AND call.DP = 209) OR (call.call_set_name = 'LP6005144-DNA_C09' AND call.DP = 112) OR (call.call_set_name = 'LP6005243-DNA_A01' AND call.DP = 133) OR (call.call_set_name = 'LP6005051-DNA_F02' AND call.DP = 136) OR (call.call_set_name = 'LP6005243-DNA_E05' AND call.DP = 175) OR (call.call_set_name = 'LP6005051-DNA_B08' AND call.DP = 113) OR (call.call_set_name = 'LP6005038-DNA_C11' AND call.DP = 132) OR (call.call_set_name = 'LP6005144-DNA_B05' AND call.DP = 95) OR (call.call_set_name = 'LP6005144-DNA_F12' AND call.DP = 146) OR (call.call_set_name = 'LP6005243-DNA_F03' AND call.DP = 137) OR (call.call_set_name = 'LP6005243-DNA_F08' AND call.DP = 126) OR (call.call_set_name = 'LP6005693-DNA_A02' AND call.DP = 100) OR (call.call_set_name = 'LP6005692-DNA_D11' AND call.DP = 117) OR (call.call_set_name = 'LP6005038-DNA_F07' AND call.DP = 138) OR (call.call_set_name = 'LP6005243-DNA_G08' AND call.DP = 102) OR (call.call_set_name = 'LP6005038-DNA_F10' AND call.DP = 99) OR (call.call_set_name = 'LP6005144-DNA_G03' AND call.DP = 107) OR (call.call_set_name = 'LP6005051-DNA_F10' AND call.DP = 165) OR (call.call_set_name = 'LP6005144-DNA_G05' AND call.DP = 167) OR (call.call_set_name = 'LP6005692-DNA_F03' AND call.DP = 105) OR (call.call_set_name = 'LP6005243-DNA_F04' AND call.DP = 189) OR (call.call_set_name = 'LP6005144-DNA_C12' AND call.DP = 108) OR (call.call_set_name = 'LP6005692-DNA_E12' AND call.DP = 168) OR (call.call_set_name = 'LP6005692-DNA_D10' AND call.DP = 193) OR (call.call_set_name = 'LP6005038-DNA_H07' AND call.DP = 121) OR (call.call_set_name = 'LP6005051-DNA_D01' AND call.DP = 139) OR (call.call_set_name = 'LP6005144-DNA_E03' AND call.DP = 142) OR (call.call_set_name = 'LP6005692-DNA_E06' AND call.DP = 197) OR (call.call_set_name = 'LP6005051-DNA_D11' AND call.DP = 104) OR (call.call_set_name = 'LP6005692-DNA_A02' AND call.DP = 178) OR (call.call_set_name = 'LP6005051-DNA_G12' AND call.DP = 137) OR (call.call_set_name = 'LP6005692-DNA_B11' AND call.DP = 227) OR (call.call_set_name = 'LP6005144-DNA_E10' AND call.DP = 160) OR (call.call_set_name = 'LP6005243-DNA_A09' AND call.DP = 152) OR (call.call_set_name = 'LP6005051-DNA_B11' AND call.DP = 174) OR (call.call_set_name = 'LP6005038-DNA_B09' AND call.DP = 119) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 108) OR (call.call_set_name = 'LP6005051-DNA_A01' AND call.DP = 132) OR (call.call_set_name = 'LP6005692-DNA_A06' AND call.DP = 173) OR (call.call_set_name = 'LP6005038-DNA_D02' AND call.DP = 149) OR (call.call_set_name = 'LP6005692-DNA_F02' AND call.DP = 127) OR (call.call_set_name = 'LP6005692-DNA_D06' AND call.DP = 123) OR (call.call_set_name = 'LP6005144-DNA_D08' AND call.DP = 147) OR (call.call_set_name = 'LP6005038-DNA_F02' AND call.DP = 132) OR (call.call_set_name = 'LP6005038-DNA_B05' AND call.DP = 141) OR (call.call_set_name = 'LP6005038-DNA_H04' AND call.DP = 130) OR (call.call_set_name = 'LP6005144-DNA_D01' AND call.DP = 172) OR (call.call_set_name = 'LP6005144-DNA_F06' AND call.DP = 111) OR (call.call_set_name = 'LP6005144-DNA_F07' AND call.DP = 200) OR (call.call_set_name = 'LP6005038-DNA_B07' AND call.DP = 106) OR (call.call_set_name = 'LP6005144-DNA_F08' AND call.DP = 101) OR (call.call_set_name = 'LP6005038-DNA_G10' AND call.DP = 162) OR (call.call_set_name = 'LP6005243-DNA_B01' AND call.DP = 208) OR (call.call_set_name = 'LP6005038-DNA_G11' AND call.DP = 93) OR (call.call_set_name = 'LP6005038-DNA_B06' AND call.DP = 180) OR (call.call_set_name = 'LP6005692-DNA_B12' AND call.DP = 221) OR (call.call_set_name = 'LP6005243-DNA_H04' AND call.DP = 249) OR (call.call_set_name = 'LP6005051-DNA_G01' AND call.DP = 132) OR (call.call_set_name = 'LP6005051-DNA_H05' AND call.DP = 111) OR (call.call_set_name = 'LP6005038-DNA_C01' AND call.DP = 113) OR (call.call_set_name = 'LP6005144-DNA_D05' AND call.DP = 172) OR (call.call_set_name = 'LP6005038-DNA_C09' AND call.DP = 171) OR (call.call_set_name = 'LP6005051-DNA_C09' AND call.DP = 157) OR (call.call_set_name = 'LP6005243-DNA_B09' AND call.DP = 150) OR (call.call_set_name = 'LP6005243-DNA_D10' AND call.DP = 113) OR (call.call_set_name = 'LP6005038-DNA_C08' AND call.DP = 141) OR (call.call_set_name = 'LP6005051-DNA_F08' AND call.DP = 114) OR (call.call_set_name = 'LP6005243-DNA_C02' AND call.DP = 102) OR (call.call_set_name = 'LP6005038-DNA_A05' AND call.DP = 110) OR (call.call_set_name = 'LP6005144-DNA_G01' AND call.DP = 145) OR (call.call_set_name = 'LP6005051-DNA_G11' AND call.DP = 250) OR (call.call_set_name = 'LP6005051-DNA_A06' AND call.DP = 150) OR (call.call_set_name = 'LP6005243-DNA_B03' AND call.DP = 167) OR (call.call_set_name = 'LP6005144-DNA_A04' AND call.DP = 153) OR (call.call_set_name = 'LP6005692-DNA_E11' AND call.DP = 150) OR (call.call_set_name = 'LP6005051-DNA_C07' AND call.DP = 129) OR (call.call_set_name = 'LP6005051-DNA_C04' AND call.DP = 118) OR (call.call_set_name = 'LP6005692-DNA_A05' AND call.DP = 103) OR (call.call_set_name = 'LP6005038-DNA_G03' AND call.DP = 110) OR (call.call_set_name = 'LP6005038-DNA_E07' AND call.DP = 126) OR (call.call_set_name = 'LP6005144-DNA_B12' AND call.DP = 193) OR (call.call_set_name = 'LP6005051-DNA_C06' AND call.DP = 171) OR (call.call_set_name = 'LP6005144-DNA_G06' AND call.DP = 115) OR (call.call_set_name = 'LP6005144-DNA_A06' AND call.DP = 121) OR (call.call_set_name = 'LP6005243-DNA_F06' AND call.DP = 180) OR (call.call_set_name = 'LP6005038-DNA_A09' AND call.DP = 173) OR (call.call_set_name = 'LP6005144-DNA_E05' AND call.DP = 115) OR (call.call_set_name = 'LP6005693-DNA_B01' AND call.DP = 155) OR (call.call_set_name = 'LP6005051-DNA_E01' AND call.DP = 126) OR (call.call_set_name = 'LP6005144-DNA_G11' AND call.DP = 110) OR (call.call_set_name = 'LP6005243-DNA_D01' AND call.DP = 170) OR (call.call_set_name = 'LP6005038-DNA_G12' AND call.DP = 180) OR (call.call_set_name = 'LP6005038-DNA_C04' AND call.DP = 123) OR (call.call_set_name = 'LP6005243-DNA_H05' AND call.DP = 150) OR (call.call_set_name = 'LP6005038-DNA_H02' AND call.DP = 155) OR (call.call_set_name = 'LP6005243-DNA_B06' AND call.DP = 146) OR (call.call_set_name = 'LP6005692-DNA_B01' AND call.DP = 143) OR (call.call_set_name = 'LP6005051-DNA_B05' AND call.DP = 143) OR (call.call_set_name = 'LP6005243-DNA_B05' AND call.DP = 111) OR (call.call_set_name = 'LP6005692-DNA_C05' AND call.DP = 99) OR (call.call_set_name = 'LP6005144-DNA_G02' AND call.DP = 110) OR (call.call_set_name = 'LP6005051-DNA_H07' AND call.DP = 143) OR (call.call_set_name = 'LP6005243-DNA_E06' AND call.DP = 105) OR (call.call_set_name = 'LP6005243-DNA_D02' AND call.DP = 109) OR (call.call_set_name = 'LP6005144-DNA_C08' AND call.DP = 109) OR (call.call_set_name = 'LP6005144-DNA_B08' AND call.DP = 82) OR (call.call_set_name = 'LP6005144-DNA_F03' AND call.DP = 105) OR (call.call_set_name = 'LP6005051-DNA_A08' AND call.DP = 121) OR (call.call_set_name = 'LP6005243-DNA_F03' AND call.DP = 138) OR (call.call_set_name = 'LP6005692-DNA_H05' AND call.DP = 108) OR (call.call_set_name = 'LP6005038-DNA_G06' AND call.DP = 90) OR (call.call_set_name = 'LP6005692-DNA_D11' AND call.DP = 109) OR (call.call_set_name = 'LP6005243-DNA_F05' AND call.DP = 132) OR (call.call_set_name = 'LP6005038-DNA_F07' AND call.DP = 130) OR (call.call_set_name = 'LP6005051-DNA_F01' AND call.DP = 84) OR (call.call_set_name = 'LP6005243-DNA_G08' AND call.DP = 95) OR (call.call_set_name = 'LP6005144-DNA_H01' AND call.DP = 87) OR (call.call_set_name = 'LP6005038-DNA_E03' AND call.DP = 106) OR (call.call_set_name = 'LP6005051-DNA_H06' AND call.DP = 110) OR (call.call_set_name = 'LP6005038-DNA_A02' AND call.DP = 106) OR (call.call_set_name = 'LP6005243-DNA_E01' AND call.DP = 156) OR (call.call_set_name = 'LP6005243-DNA_F10' AND call.DP = 126) OR (call.call_set_name = 'LP6005038-DNA_F10' AND call.DP = 93) OR (call.call_set_name = 'LP6005243-DNA_B04' AND call.DP = 135) OR (call.call_set_name = 'LP6005051-DNA_G02' AND call.DP = 158) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 105) OR (call.call_set_name = 'LP6005144-DNA_H04' AND call.DP = 100) OR (call.call_set_name = 'LP6005243-DNA_A01' AND call.DP = 138) OR (call.call_set_name = 'LP6005692-DNA_B02' AND call.DP = 106) OR (call.call_set_name = 'LP6005243-DNA_A02' AND call.DP = 103) OR (call.call_set_name = 'LP6005144-DNA_G02' AND call.DP = 114) OR (call.call_set_name = 'LP6005051-DNA_C05' AND call.DP = 106) OR (call.call_set_name = 'LP6005038-DNA_B10' AND call.DP = 115) OR (call.call_set_name = 'LP6005051-DNA_D07' AND call.DP = 132) OR (call.call_set_name = 'LP6005144-DNA_D02' AND call.DP = 95) OR (call.call_set_name = 'LP6005038-DNA_A10' AND call.DP = 99) OR (call.call_set_name = 'LP6005243-DNA_F03' AND call.DP = 143) OR (call.call_set_name = 'LP6005038-DNA_G06' AND call.DP = 96) OR (call.call_set_name = 'LP6005243-DNA_G08' AND call.DP = 101) OR (call.call_set_name = 'LP6005051-DNA_A12' AND call.DP = 89) OR (call.call_set_name = 'LP6005038-DNA_F03' AND call.DP = 94) OR (call.call_set_name = 'LP6005051-DNA_B12' AND call.DP = 85) OR (call.call_set_name = 'LP6005051-DNA_E11' AND call.DP = 108) OR (call.call_set_name = 'LP6005243-DNA_F10' AND call.DP = 128) OR (call.call_set_name = 'LP6005038-DNA_F10' AND call.DP = 101) OR (call.call_set_name = 'LP6005051-DNA_H07' AND call.DP = 133) OR (call.call_set_name = 'LP6005051-DNA_A04' AND call.DP = 80) OR (call.call_set_name = 'LP6005243-DNA_F04' AND call.DP = 193) OR (call.call_set_name = 'LP6005051-DNA_E07' AND call.DP = 115) OR (call.call_set_name = 'LP6005243-DNA_A05' AND call.DP = 126) OR (call.call_set_name = 'LP6005692-DNA_H11' AND call.DP = 100) OR (call.call_set_name = 'LP6005051-DNA_F06' AND call.DP = 112) OR (call.call_set_name = 'LP6005692-DNA_B11' AND call.DP = 225) OR (call.call_set_name = 'LP6005038-DNA_E06' AND call.DP = 145) OR (call.call_set_name = 'LP6005144-DNA_E03' AND call.DP = 156) OR (call.call_set_name = 'LP6005692-DNA_E06' AND call.DP = 180) OR (call.call_set_name = 'LP6005051-DNA_F04' AND call.DP = 116) OR (call.call_set_name = 'LP6005038-DNA_F11' AND call.DP = 73) OR (call.call_set_name = 'LP6005692-DNA_G02' AND call.DP = 92) OR (call.call_set_name = 'LP6005038-DNA_B11' AND call.DP = 169) OR (call.call_set_name = 'LP6005144-DNA_D12' AND call.DP = 105) OR (call.call_set_name = 'LP6005243-DNA_A09' AND call.DP = 109) OR (call.call_set_name = 'LP6005038-DNA_B02' AND call.DP = 100) OR (call.call_set_name = 'LP6005038-DNA_B09' AND call.DP = 110) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 109) OR (call.call_set_name = 'LP6005051-DNA_G04' AND call.DP = 123) OR (call.call_set_name = 'LP6005051-DNA_H03' AND call.DP = 229) OR (call.call_set_name = 'LP6005692-DNA_D12' AND call.DP = 217) OR (call.call_set_name = 'LP6005038-DNA_D10' AND call.DP = 213) OR (call.call_set_name = 'LP6005051-DNA_B01' AND call.DP = 118) OR (call.call_set_name = 'LP6005243-DNA_D02' AND call.DP = 120) OR (call.call_set_name = 'LP6005693-DNA_D01' AND call.DP = 194) OR (call.call_set_name = 'LP6005144-DNA_G12' AND call.DP = 151) OR (call.call_set_name = 'LP6005144-DNA_D01' AND call.DP = 199) OR (call.call_set_name = 'LP6005051-DNA_G10' AND call.DP = 166) OR (call.call_set_name = 'LP6005038-DNA_G08' AND call.DP = 196) OR (call.call_set_name = 'LP6005038-DNA_C11' AND call.DP = 114) OR (call.call_set_name = 'LP6005051-DNA_B06' AND call.DP = 153) OR (call.call_set_name = 'LP6005038-DNA_B01' AND call.DP = 84) OR (call.call_set_name = 'LP6005038-DNA_B10' AND call.DP = 122) OR (call.call_set_name = 'LP6005144-DNA_H07' AND call.DP = 141) OR (call.call_set_name = 'LP6005038-DNA_D07' AND call.DP = 79) OR (call.call_set_name = 'LP6005144-DNA_B05' AND call.DP = 79) OR (call.call_set_name = 'LP6005692-DNA_F04' AND call.DP = 150) OR (call.call_set_name = 'LP6005038-DNA_G11' AND call.DP = 97) OR (call.call_set_name = 'LP6005051-DNA_C06' AND call.DP = 174) OR (call.call_set_name = 'LP6005692-DNA_F07' AND call.DP = 163) OR (call.call_set_name = 'LP6005692-DNA_H05' AND call.DP = 118) OR (call.call_set_name = 'LP6005243-DNA_H02' AND call.DP = 142) OR (call.call_set_name = 'LP6005051-DNA_D02' AND call.DP = 133) OR (call.call_set_name = 'LP6005144-DNA_H02' AND call.DP = 127) OR (call.call_set_name = 'LP6005692-DNA_H09' AND call.DP = 122) OR (call.call_set_name = 'LP6005144-DNA_B10' AND call.DP = 163) OR (call.call_set_name = 'LP6005692-DNA_D03' AND call.DP = 184) OR (call.call_set_name = 'LP6005051-DNA_A03' AND call.DP = 182) OR (call.call_set_name = 'LP6005144-DNA_D05' AND call.DP = 171) OR (call.call_set_name = 'LP6005038-DNA_C09' AND call.DP = 154) OR (call.call_set_name = 'LP6005144-DNA_C01' AND call.DP = 115) OR (call.call_set_name = 'LP6005051-DNA_E06' AND call.DP = 107) OR (call.call_set_name = 'LP6005243-DNA_F07' AND call.DP = 120) OR (call.call_set_name = 'LP6005051-DNA_F01' AND call.DP = 98) OR (call.call_set_name = 'LP6005038-DNA_H08' AND call.DP = 135) OR (call.call_set_name = 'LP6005144-DNA_B06' AND call.DP = 85) OR (call.call_set_name = 'LP6005051-DNA_B07' AND call.DP = 165) OR (call.call_set_name = 'LP6005051-DNA_C12' AND call.DP = 131) OR (call.call_set_name = 'LP6005243-DNA_H06' AND call.DP = 125) OR (call.call_set_name = 'LP6005243-DNA_C01' AND call.DP = 141) OR (call.call_set_name = 'LP6005144-DNA_A01' AND call.DP = 140) OR (call.call_set_name = 'LP6005051-DNA_E09' AND call.DP = 154) OR (call.call_set_name = 'LP6005051-DNA_H01' AND call.DP = 115) OR (call.call_set_name = 'LP6005243-DNA_A11' AND call.DP = 146) OR (call.call_set_name = 'LP6005144-DNA_B09' AND call.DP = 125) OR (call.call_set_name = 'LP6005243-DNA_E09' AND call.DP = 108) OR (call.call_set_name = 'LP6005144-DNA_A04' AND call.DP = 159) OR (call.call_set_name = 'LP6005692-DNA_F11' AND call.DP = 164) OR (call.call_set_name = 'LP6005692-DNA_E11' AND call.DP = 148) OR (call.call_set_name = 'LP6005051-DNA_E10' AND call.DP = 78) OR (call.call_set_name = 'LP6005243-DNA_D06' AND call.DP = 98) OR (call.call_set_name = 'LP6005243-DNA_D03' AND call.DP = 170) OR (call.call_set_name = 'LP6005051-DNA_C04' AND call.DP = 117) OR (call.call_set_name = 'LP6005243-DNA_F10' AND call.DP = 115) OR (call.call_set_name = 'LP6005038-DNA_E07' AND call.DP = 103) OR (call.call_set_name = 'LP6005038-DNA_F05' AND call.DP = 117) OR (call.call_set_name = 'LP6005243-DNA_F02' AND call.DP = 170) OR (call.call_set_name = 'LP6005243-DNA_B04' AND call.DP = 127) OR (call.call_set_name = 'LP6005144-DNA_B12' AND call.DP = 176) OR (call.call_set_name = 'LP6005051-DNA_F12' AND call.DP = 153) OR (call.call_set_name = 'LP6005144-DNA_H08' AND call.DP = 139) OR (call.call_set_name = 'LP6005038-DNA_C05' AND call.DP = 164) OR (call.call_set_name = 'LP6005243-DNA_F01' AND call.DP = 208) OR (call.call_set_name = 'LP6005243-DNA_C05' AND call.DP = 115) OR (call.call_set_name = 'LP6005144-DNA_H05' AND call.DP = 184) OR (call.call_set_name = 'LP6005144-DNA_H09' AND call.DP = 159) OR (call.call_set_name = 'LP6005692-DNA_B02' AND call.DP = 113) OR (call.call_set_name = 'LP6005243-DNA_C04' AND call.DP = 95) OR (call.call_set_name = 'LP6005051-DNA_B05' AND call.DP = 161) OR (call.call_set_name = 'LP6005051-DNA_F10' AND call.DP = 141) OR (call.call_set_name = 'LP6005144-DNA_H03' AND call.DP = 144) OR (call.call_set_name = 'LP6005243-DNA_H09' AND call.DP = 141) OR (call.call_set_name = 'LP6005243-DNA_H05' AND call.DP = 145) OR (call.call_set_name = 'LP6005243-DNA_G01' AND call.DP = 206) OR (call.call_set_name = 'LP6005692-DNA_F06' AND call.DP = 152) OR (call.call_set_name = 'LP6005243-DNA_D05' AND call.DP = 109) OR (call.call_set_name = 'LP6005243-DNA_E04' AND call.DP = 168) OR (call.call_set_name = 'LP6005051-DNA_C03' AND call.DP = 172) OR (call.call_set_name = 'LP6005243-DNA_G03' AND call.DP = 150) OR (call.call_set_name = 'LP6005051-DNA_E08' AND call.DP = 193) OR (call.call_set_name = 'LP6005692-DNA_A08' AND call.DP = 106) OR (call.call_set_name = 'LP6005692-DNA_A06' AND call.DP = 152) OR (call.call_set_name = 'LP6005038-DNA_D05' AND call.DP = 114) OR (call.call_set_name = 'LP6005038-DNA_H12' AND call.DP = 115) OR (call.call_set_name = 'LP6005051-DNA_E01' AND call.DP = 151) OR (call.call_set_name = 'LP6005051-DNA_D11' AND call.DP = 109) OR (call.call_set_name = 'LP6005144-DNA_A08' AND call.DP = 102) OR (call.call_set_name = 'LP6005692-DNA_D06' AND call.DP = 115) OR (call.call_set_name = 'LP6005243-DNA_B07' AND call.DP = 95) OR (call.call_set_name = 'LP6005051-DNA_E05' AND call.DP = 114) OR (call.call_set_name = 'LP6005038-DNA_E02' AND call.DP = 162) OR (call.call_set_name = 'LP6005243-DNA_E01' AND call.DP = 139) OR (call.call_set_name = 'LP6005692-DNA_H07' AND call.DP = 124) OR (call.call_set_name = 'LP6005051-DNA_E11' AND call.DP = 96) OR (call.call_set_name = 'LP6005038-DNA_D02' AND call.DP = 144) OR (call.call_set_name = 'LP6005243-DNA_B06' AND call.DP = 132) OR (call.call_set_name = 'LP6005692-DNA_H06' AND call.DP = 123) OR (call.call_set_name = 'LP6005051-DNA_E03' AND call.DP = 186) OR (call.call_set_name = 'LP6005038-DNA_B11' AND call.DP = 167) OR (call.call_set_name = 'LP6005038-DNA_H02' AND call.DP = 134) OR (call.call_set_name = 'LP6005051-DNA_D11' AND call.DP = 92) OR (call.call_set_name = 'LP6005051-DNA_D01' AND call.DP = 122) OR (call.call_set_name = 'LP6005051-DNA_B08' AND call.DP = 107) OR (call.call_set_name = 'LP6005243-DNA_H05' AND call.DP = 120) OR (call.call_set_name = 'LP6005038-DNA_D10' AND call.DP = 203) OR (call.call_set_name = 'LP6005144-DNA_H11' AND call.DP = 103) OR (call.call_set_name = 'LP6005051-DNA_H04' AND call.DP = 124) OR (call.call_set_name = 'LP6005692-DNA_F02' AND call.DP = 133) OR (call.call_set_name = 'LP6005051-DNA_A11' AND call.DP = 151) OR (call.call_set_name = 'LP6005144-DNA_A01' AND call.DP = 120) OR (call.call_set_name = 'LP6005692-DNA_E12' AND call.DP = 128) OR (call.call_set_name = 'LP6005144-DNA_D05' AND call.DP = 174) OR (call.call_set_name = 'LP6005243-DNA_D03' AND call.DP = 146) OR (call.call_set_name = 'LP6005243-DNA_D10' AND call.DP = 122) OR (call.call_set_name = 'LP6005051-DNA_B05' AND call.DP = 139) OR (call.call_set_name = 'LP6005144-DNA_A07' AND call.DP = 105) OR (call.call_set_name = 'LP6005038-DNA_B02' AND call.DP = 94) OR (call.call_set_name = 'LP6005051-DNA_H08' AND call.DP = 112) OR (call.call_set_name = 'LP6005038-DNA_A06' AND call.DP = 166) OR (call.call_set_name = 'LP6005692-DNA_B08' AND call.DP = 152) OR (call.call_set_name = 'LP6005051-DNA_B06' AND call.DP = 145) OR (call.call_set_name = 'LP6005051-DNA_D10' AND call.DP = 81) OR (call.call_set_name = 'LP6005051-DNA_D02' AND call.DP = 115) OR (call.call_set_name = 'LP6005692-DNA_F06' AND call.DP = 149) OR (call.call_set_name = 'LP6005692-DNA_H10' AND call.DP = 116) OR (call.call_set_name = 'LP6005243-DNA_E06' AND call.DP = 111) OR (call.call_set_name = 'LP6005693-DNA_D01' AND call.DP = 197) OR (call.call_set_name = 'LP6005038-DNA_G09' AND call.DP = 75) OR (call.call_set_name = 'LP6005692-DNA_D10' AND call.DP = 184) OR (call.call_set_name = 'LP6005038-DNA_G12' AND call.DP = 158) OR (call.call_set_name = 'LP6005243-DNA_H10' AND call.DP = 106) OR (call.call_set_name = 'LP6005243-DNA_E09' AND call.DP = 113) OR (call.call_set_name = 'LP6005051-DNA_H06' AND call.DP = 98) OR (call.call_set_name = 'LP6005692-DNA_E06' AND call.DP = 170) OR (call.call_set_name = 'LP6005038-DNA_D02' AND call.DP = 134) OR (call.call_set_name = 'LP6005051-DNA_C09' AND call.DP = 131) OR (call.call_set_name = 'LP6005051-DNA_G01' AND call.DP = 130) OR (call.call_set_name = 'LP6005243-DNA_C01' AND call.DP = 99) OR (call.call_set_name = 'LP6005692-DNA_A06' AND call.DP = 141) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 89) OR (call.call_set_name = 'LP6005144-DNA_F07' AND call.DP = 192) OR (call.call_set_name = 'LP6005038-DNA_A10' AND call.DP = 82) OR (call.call_set_name = 'LP6005243-DNA_E04' AND call.DP = 165) OR (call.call_set_name = 'LP6005038-DNA_D05' AND call.DP = 108) OR (call.call_set_name = 'LP6005693-DNA_A01' AND call.DP = 161) OR (call.call_set_name = 'LP6005051-DNA_F10' AND call.DP = 143) OR (call.call_set_name = 'LP6005051-DNA_F08' AND call.DP = 96) OR (call.call_set_name = 'LP6005038-DNA_C05' AND call.DP = 154) OR (call.call_set_name = 'LP6005692-DNA_B03' AND call.DP = 104) OR (call.call_set_name = 'LP6005038-DNA_H01' AND call.DP = 138) OR (call.call_set_name = 'LP6005144-DNA_F08' AND call.DP = 107) OR (call.call_set_name = 'LP6005051-DNA_H05' AND call.DP = 92) OR (call.call_set_name = 'LP6005243-DNA_G03' AND call.DP = 156) OR (call.call_set_name = 'LP6005051-DNA_B01' AND call.DP = 117) OR (call.call_set_name = 'LP6005692-DNA_H06' AND call.DP = 125) OR (call.call_set_name = 'LP6005144-DNA_F06' AND call.DP = 105) OR (call.call_set_name = 'LP6005243-DNA_H01' AND call.DP = 110) OR (call.call_set_name = 'LP6005243-DNA_H06' AND call.DP = 105) OR (call.call_set_name = 'LP6005144-DNA_C12' AND call.DP = 89) OR (call.call_set_name = 'LP6005038-DNA_E09' AND call.DP = 83) OR (call.call_set_name = 'LP6005144-DNA_A04' AND call.DP = 142) OR (call.call_set_name = 'LP6005144-DNA_A06' AND call.DP = 115) OR (call.call_set_name = 'LP6005038-DNA_F03' AND call.DP = 93) OR (call.call_set_name = 'LP6005038-DNA_C08' AND call.DP = 137) OR (call.call_set_name = 'LP6005051-DNA_F02' AND call.DP = 138) OR (call.call_set_name = 'LP6005051-DNA_G04' AND call.DP = 106) OR (call.call_set_name = 'LP6005243-DNA_H02' AND call.DP = 125) OR (call.call_set_name = 'LP6005038-DNA_C01' AND call.DP = 128) OR (call.call_set_name = 'LP6005693-DNA_A03' AND call.DP = 67) OR (call.call_set_name = 'LP6005243-DNA_B03' AND call.DP = 166) OR (call.call_set_name = 'LP6005051-DNA_E10' AND call.DP = 81) OR (call.call_set_name = 'LP6005038-DNA_F05' AND call.DP = 116) OR (call.call_set_name = 'LP6005051-DNA_B09' AND call.DP = 126) OR (call.call_set_name = 'LP6005144-DNA_D12' AND call.DP = 97) OR (call.call_set_name = 'LP6005692-DNA_F03' AND call.DP = 127) OR (call.call_set_name = 'LP6005051-DNA_C04' AND call.DP = 126) OR (call.call_set_name = 'LP6005051-DNA_G12' AND call.DP = 150) OR (call.call_set_name = 'LP6005692-DNA_H07' AND call.DP = 119) OR (call.call_set_name = 'LP6005692-DNA_F01' AND call.DP = 183) OR (call.call_set_name = 'LP6005243-DNA_G08' AND call.DP = 112) OR (call.call_set_name = 'LP6005051-DNA_B07' AND call.DP = 141) OR (call.call_set_name = 'LP6005051-DNA_D03' AND call.DP = 95) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 92) OR (call.call_set_name = 'LP6005693-DNA_B01' AND call.DP = 146) OR (call.call_set_name = 'LP6005144-DNA_B04' AND call.DP = 89) OR (call.call_set_name = 'LP6005692-DNA_G01' AND call.DP = 125) OR (call.call_set_name = 'LP6005051-DNA_C06' AND call.DP = 178) OR (call.call_set_name = 'LP6005051-DNA_D06' AND call.DP = 122) OR (call.call_set_name = 'LP6005243-DNA_G03' AND call.DP = 199) OR (call.call_set_name = 'LP6005243-DNA_D04' AND call.DP = 147) OR (call.call_set_name = 'LP6005051-DNA_H05' AND call.DP = 133) OR (call.call_set_name = 'LP6005051-DNA_B05' AND call.DP = 177) OR (call.call_set_name = 'LP6005051-DNA_C03' AND call.DP = 170) OR (call.call_set_name = 'LP6005038-DNA_D10' AND call.DP = 250) OR (call.call_set_name = 'LP6005243-DNA_G10' AND call.DP = 131) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 158) OR (call.call_set_name = 'LP6005038-DNA_H01' AND call.DP = 187) OR (call.call_set_name = 'LP6005692-DNA_B03' AND call.DP = 160) OR (call.call_set_name = 'LP6005038-DNA_G07' AND call.DP = 147) OR (call.call_set_name = 'LP6005051-DNA_H12' AND call.DP = 168) OR (call.call_set_name = 'LP6005038-DNA_G05' AND call.DP = 159) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 151) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 183) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 150) OR (call.call_set_name = 'LP6005051-DNA_C03' AND call.DP = 208) OR (call.call_set_name = 'LP6005243-DNA_F02' AND call.DP = 225) OR (call.call_set_name = 'LP6005693-DNA_A03' AND call.DP = 138) OR (call.call_set_name = 'LP6005243-DNA_B03' AND call.DP = 237) OR (call.call_set_name = 'LP6005038-DNA_H01' AND call.DP = 217) OR (call.call_set_name = 'LP6005051-DNA_D06' AND call.DP = 167) OR (call.call_set_name = 'LP6005038-DNA_H10' AND call.DP = 166) OR (call.call_set_name = 'LP6005144-DNA_F07' AND call.DP = 250) OR (call.call_set_name = 'LP6005051-DNA_A07' AND call.DP = 192) OR (call.call_set_name = 'LP6005243-DNA_C10' AND call.DP = 234) OR (call.call_set_name = 'LP6005051-DNA_F04' AND call.DP = 187) OR (call.call_set_name = 'LP6005038-DNA_C10' AND call.DP = 189) OR (call.call_set_name = 'LP6005051-DNA_E02' AND call.DP = 156) OR (call.call_set_name = 'LP6005051-DNA_F02' AND call.DP = 215) OR (call.call_set_name = 'LP6005692-DNA_E01' AND call.DP = 182) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 168) OR (call.call_set_name = 'LP6005051-DNA_B03' AND call.DP = 157) OR (call.call_set_name = 'LP6005051-DNA_F05' AND call.DP = 171) OR (call.call_set_name = 'LP6005051-DNA_H02' AND call.DP = 154) OR (call.call_set_name = 'LP6005243-DNA_F06' AND call.DP = 233) OR (call.call_set_name = 'LP6005038-DNA_F06' AND call.DP = 142) OR (call.call_set_name = 'LP6005243-DNA_A07' AND call.DP = 220) OR (call.call_set_name = 'LP6005051-DNA_H12' AND call.DP = 175) OR (call.call_set_name = 'LP6005051-DNA_A06' AND call.DP = 228) OR (call.call_set_name = 'LP6005038-DNA_F05' AND call.DP = 182) OR (call.call_set_name = 'LP6005051-DNA_H11' AND call.DP = 118) OR (call.call_set_name = 'LP6005692-DNA_F11' AND call.DP = 244) OR (call.call_set_name = 'LP6005051-DNA_D01' AND call.DP = 229) OR (call.call_set_name = 'LP6005051-DNA_F03' AND call.DP = 223) OR (call.call_set_name = 'LP6005051-DNA_C04' AND call.DP = 188) OR (call.call_set_name = 'LP6005038-DNA_E06' AND call.DP = 193) OR (call.call_set_name = 'LP6005038-DNA_E07' AND call.DP = 196) OR (call.call_set_name = 'LP6005038-DNA_A05' AND call.DP = 191) OR (call.call_set_name = 'LP6005051-DNA_B01' AND call.DP = 202) OR (call.call_set_name = 'LP6005692-DNA_G05' AND call.DP = 158) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 155) OR (call.call_set_name = 'LP6005144-DNA_C11' AND call.DP = 139) OR (call.call_set_name = 'LP6005038-DNA_H03' AND call.DP = 233) OR (call.call_set_name = 'LP6005693-DNA_A01' AND call.DP = 250) OR (call.call_set_name = 'LP6005038-DNA_F07' AND call.DP = 213) OR (call.call_set_name = 'LP6005243-DNA_C04' AND call.DP = 164) OR (call.call_set_name = 'LP6005144-DNA_G03' AND call.DP = 217) OR (call.call_set_name = 'LP6005038-DNA_G06' AND call.DP = 196) OR (call.call_set_name = 'LP6005051-DNA_F01' AND call.DP = 156) OR (call.call_set_name = 'LP6005243-DNA_H04' AND call.DP = 250) OR (call.call_set_name = 'LP6005243-DNA_A06' AND call.DP = 201) OR (call.call_set_name = 'LP6005038-DNA_G10' AND call.DP = 250) OR (call.call_set_name = 'LP6005243-DNA_D04' AND call.DP = 203) OR (call.call_set_name = 'LP6005051-DNA_D08' AND call.DP = 179) OR (call.call_set_name = 'LP6005038-DNA_C04' AND call.DP = 239) OR (call.call_set_name = 'LP6005243-DNA_B01' AND call.DP = 250) OR (call.call_set_name = 'LP6005144-DNA_D08' AND call.DP = 229) OR (call.call_set_name = 'LP6005051-DNA_C03' AND call.DP = 229) OR (call.call_set_name = 'LP6005692-DNA_G07' AND call.DP = 237) OR (call.call_set_name = 'LP6005144-DNA_D04' AND call.DP = 220) OR (call.call_set_name = 'LP6005692-DNA_B07' AND call.DP = 164) OR (call.call_set_name = 'LP6005038-DNA_D09' AND call.DP = 225) OR (call.call_set_name = 'LP6005038-DNA_E01' AND call.DP = 210) OR (call.call_set_name = 'LP6005692-DNA_D02' AND call.DP = 150) OR (call.call_set_name = 'LP6005692-DNA_B03' AND call.DP = 216) OR (call.call_set_name = 'LP6005051-DNA_C05' AND call.DP = 214) OR (call.call_set_name = 'LP6005038-DNA_H04' AND call.DP = 231) OR (call.call_set_name = 'LP6005144-DNA_G09' AND call.DP = 212) OR (call.call_set_name = 'LP6005692-DNA_F04' AND call.DP = 248) OR (call.call_set_name = 'LP6005692-DNA_E01' AND call.DP = 200) OR (call.call_set_name = 'LP6005038-DNA_F07' AND call.DP = 208) OR (call.call_set_name = 'LP6005051-DNA_G09' AND call.DP = 250) OR (call.call_set_name = 'LP6005144-DNA_A12' AND call.DP = 211) OR (call.call_set_name = 'LP6005051-DNA_D06' AND call.DP = 207) OR (call.call_set_name = 'LP6005051-DNA_D02' AND call.DP = 223) OR (call.call_set_name = 'LP6005038-DNA_D01' AND call.DP = 232) OR (call.call_set_name = 'LP6005243-DNA_C08' AND call.DP = 217) OR (call.call_set_name = 'LP6005144-DNA_B11' AND call.DP = 221) OR (call.call_set_name = 'LP6005038-DNA_G04' AND call.DP = 250) OR (call.call_set_name = 'LP6005693-DNA_B01' AND call.DP = 249) OR (call.call_set_name = 'LP6005051-DNA_B03' AND call.DP = 196) OR (call.call_set_name = 'LP6005144-DNA_B03' AND call.DP = 219) OR (call.call_set_name = 'LP6005038-DNA_C03' AND call.DP = 190) OR (call.call_set_name = 'LP6005038-DNA_C01' AND call.DP = 205) OR (call.call_set_name = 'LP6005051-DNA_F01' AND call.DP = 189) OR (call.call_set_name = 'LP6005051-DNA_H02' AND call.DP = 210) OR (call.call_set_name = 'LP6005144-DNA_A11' AND call.DP = 164) OR (call.call_set_name = 'LP6005692-DNA_G04' AND call.DP = 196) OR (call.call_set_name = 'LP6005692-DNA_C02' AND call.DP = 168) OR (call.call_set_name = 'LP6005038-DNA_H10' AND call.DP = 176) OR (call.call_set_name = 'LP6005243-DNA_H04' AND call.DP = 247) OR (call.call_set_name = 'LP6005693-DNA_B01' AND call.DP = 248) OR (call.call_set_name = 'LP6005038-DNA_F09' AND call.DP = 243) OR (call.call_set_name = 'LP6005692-DNA_B03' AND call.DP = 207) OR (call.call_set_name = 'LP6005051-DNA_C05' AND call.DP = 207) OR (call.call_set_name = 'LP6005144-DNA_G06' AND call.DP = 206) OR (call.call_set_name = 'LP6005693-DNA_A01' AND call.DP = 249) OR (call.call_set_name = 'LP6005692-DNA_D03' AND call.DP = 249) OR (call.call_set_name = 'LP6005144-DNA_H08' AND call.DP = 227) OR (call.call_set_name = 'LP6005243-DNA_A11' AND call.DP = 250) OR (call.call_set_name = 'LP6005038-DNA_D01' AND call.DP = 223) OR (call.call_set_name = 'LP6005144-DNA_A11' AND call.DP = 158) OR (call.call_set_name = 'LP6005692-DNA_F11' AND call.DP = 248) OR (call.call_set_name = 'LP6005243-DNA_F10' AND call.DP = 219) OR (call.call_set_name = 'LP6005038-DNA_F10' AND call.DP = 205) OR (call.call_set_name = 'LP6005038-DNA_G10' AND call.DP = 248) OR (call.call_set_name = 'LP6005692-DNA_H02' AND call.DP = 167) OR (call.call_set_name = 'LP6005038-DNA_G04' AND call.DP = 239) OR (call.call_set_name = 'LP6005051-DNA_F09' AND call.DP = 153) OR (call.call_set_name = 'LP6005144-DNA_G09' AND call.DP = 190) OR (call.call_set_name = 'LP6005243-DNA_D07' AND call.DP = 185) OR (call.call_set_name = 'LP6005144-DNA_B08' AND call.DP = 175) OR (call.call_set_name = 'LP6005051-DNA_E07' AND call.DP = 232) OR (call.call_set_name = 'LP6005051-DNA_A06' AND call.DP = 243) OR (call.call_set_name = 'LP6005144-DNA_A12' AND call.DP = 200) OR (call.call_set_name = 'LP6005038-DNA_F07' AND call.DP = 175) OR (call.call_set_name = 'LP6005051-DNA_B03' AND call.DP = 173) OR (call.call_set_name = 'LP6005051-DNA_H02' AND call.DP = 191)
-LIMIT 1000
-```
-
-First few results
-<!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 23:28:07 2015 -->
-<table border=1>
-<tr> <th> variant_id </th> <th> sample_id </th> <th> failure_reason </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhjks4VzIIu2xfH4l8iM3AE </td> <td> LP6005051-DNA_A12 </td> <td> titv_by_depth </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhj4s4VzIKugsNeghNTxCQ </td> <td> LP6005051-DNA_A12 </td> <td> titv_by_depth </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhj4s4VzIKugsNeghNTxCQ </td> <td> LP6005051-DNA_A10 </td> <td> titv_by_depth </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhj4s4VzIOC9rLb4q6HKLA </td> <td> LP6005051-DNA_A12 </td> <td> titv_by_depth </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhj4s4VzIOC9rLb4q6HKLA </td> <td> LP6005051-DNA_A10 </td> <td> titv_by_depth </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyMhiBtIVzIKCnkoeB4ouz5wE </td> <td> LP6005051-DNA_A12 </td> <td> titv_by_depth </td> </tr>
-   </table>
 
 ## Ti/Tv By Alternate Allele Counts
 Collect all the alternate allele counts that are outside our desired range.
@@ -606,66 +956,93 @@ WHERE
 
 Running query:   RUNNING  2.6s
 Running query:   RUNNING  3.2s
-Running query:   RUNNING  3.8s
-Running query:   RUNNING  4.4s
-Running query:   RUNNING  5.0s
-Running query:   RUNNING  5.7s
-Running query:   RUNNING  6.3s
-Running query:   RUNNING  6.9s
-Running query:   RUNNING  7.5s
-Running query:   RUNNING  8.2s
-Running query:   RUNNING  8.8s
-Running query:   RUNNING  9.4s
-Running query:   RUNNING 10.0s
-Running query:   RUNNING 10.7s
-Running query:   RUNNING 11.3s
+Running query:   RUNNING  4.1s
+Running query:   RUNNING  4.8s
+Running query:   RUNNING  5.4s
+Running query:   RUNNING  6.1s
+Running query:   RUNNING  6.7s
+Running query:   RUNNING  7.3s
+Running query:   RUNNING  8.0s
+Running query:   RUNNING  8.6s
+Running query:   RUNNING  9.3s
+Running query:   RUNNING  9.9s
+Running query:   RUNNING 10.6s
+Running query:   RUNNING 11.2s
 Running query:   RUNNING 11.9s
-Running query:   RUNNING 12.6s
-Running query:   RUNNING 13.2s
+Running query:   RUNNING 12.5s
+Running query:   RUNNING 13.1s
 Running query:   RUNNING 13.8s
 Running query:   RUNNING 14.4s
-Running query:   RUNNING 15.0s
+Running query:   RUNNING 15.1s
 Running query:   RUNNING 15.7s
 Running query:   RUNNING 16.3s
-Running query:   RUNNING 16.9s
-Running query:   RUNNING 17.5s
-Running query:   RUNNING 18.1s
-Running query:   RUNNING 18.8s
-Running query:   RUNNING 19.4s
-Running query:   RUNNING 20.0s
-Running query:   RUNNING 20.6s
-Running query:   RUNNING 21.2s
-Running query:   RUNNING 21.9s
-Running query:   RUNNING 22.5s
-Running query:   RUNNING 23.1s
-Running query:   RUNNING 23.7s
-Running query:   RUNNING 24.3s
-Running query:   RUNNING 25.0s
-Running query:   RUNNING 25.6s
-Running query:   RUNNING 26.2s
-Running query:   RUNNING 26.8s
-Running query:   RUNNING 27.4s
-Running query:   RUNNING 28.1s
-Running query:   RUNNING 28.7s
-Running query:   RUNNING 29.3s
-Running query:   RUNNING 30.3s
-Running query:   RUNNING 30.9s
-Running query:   RUNNING 31.6s
-Running query:   RUNNING 32.2s
-Running query:   RUNNING 32.8s
-Running query:   RUNNING 33.4s
-Running query:   RUNNING 34.0s
-Running query:   RUNNING 34.7s
-Running query:   RUNNING 35.3s
-Running query:   RUNNING 35.9s
+Running query:   RUNNING 17.0s
+Running query:   RUNNING 17.6s
+Running query:   RUNNING 18.2s
+Running query:   RUNNING 18.9s
+Running query:   RUNNING 19.5s
+Running query:   RUNNING 20.1s
+Running query:   RUNNING 20.8s
+Running query:   RUNNING 21.4s
+Running query:   RUNNING 22.1s
+Running query:   RUNNING 22.7s
+Running query:   RUNNING 23.3s
+Running query:   RUNNING 24.0s
+Running query:   RUNNING 24.6s
+Running query:   RUNNING 25.3s
+Running query:   RUNNING 25.9s
+Running query:   RUNNING 26.5s
+Running query:   RUNNING 27.2s
+Running query:   RUNNING 27.8s
+Running query:   RUNNING 28.5s
+Running query:   RUNNING 29.2s
+Running query:   RUNNING 29.8s
+Running query:   RUNNING 30.5s
+Running query:   RUNNING 31.1s
+Running query:   RUNNING 31.7s
+Running query:   RUNNING 32.4s
+Running query:   RUNNING 33.0s
+Running query:   RUNNING 33.6s
+Running query:   RUNNING 34.3s
+Running query:   RUNNING 34.9s
+Running query:   RUNNING 35.6s
+Running query:   RUNNING 36.2s
+Running query:   RUNNING 36.8s
+Running query:   RUNNING 37.5s
+Running query:   RUNNING 38.1s
+Running query:   RUNNING 38.7s
+Running query:   RUNNING 39.4s
+Running query:   RUNNING 40.0s
+Running query:   RUNNING 40.7s
+Running query:   RUNNING 41.3s
+Running query:   RUNNING 41.9s
+Running query:   RUNNING 42.6s
+Running query:   RUNNING 43.2s
+Running query:   RUNNING 43.9s
+Running query:   RUNNING 44.5s
+Running query:   RUNNING 45.1s
+Running query:   RUNNING 45.8s
+Running query:   RUNNING 46.4s
+Running query:   RUNNING 47.1s
+Running query:   RUNNING 47.7s
+Running query:   RUNNING 48.4s
+Running query:   RUNNING 49.0s
+Running query:   RUNNING 49.7s
+Running query:   RUNNING 50.3s
+Running query:   RUNNING 51.0s
+Running query:   RUNNING 51.6s
+Running query:   RUNNING 52.3s
+Running query:   RUNNING 52.9s
+Running query:   RUNNING 53.5s
+Running query:   RUNNING 54.2s
 ```
 
 Displaying the results:
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 23:28:45 2015 -->
+<!-- Fri May 29 01:44:08 2015 -->
 <table border=1>
 <tr> <th> quantile </th> <th> row_num </th>  </tr>
-  <tr> <td align="right"> 666.70 </td> <td align="right"> 1999 </td> </tr>
+  <tr> <td align="right"> 663.30 </td> <td align="right"> 1999 </td> </tr>
    </table>
 
 Determine the cutoffs:
@@ -673,16 +1050,18 @@ Determine the cutoffs:
 ```r
 maxChiSq = result$quantile
 ```
-Cutoff: 666.6987564
+Cutoff: 663.3034678
 
 Determine which genomes are outside our desired range
 
 ```r
 values = list("_CUTOFF_" = maxChiSq)
 sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
+outputTable = 'qc_tables.hardy_weinberg'
 result <- DisplayAndDispatchQuery("../sql/hwe-fail.sql",
                                   project=project,
-                                  replacements=c(queryReplacements, values, sortAndLimit))
+                                  replacements=c(queryReplacements, values),
+                                  outputTable=outputTable)
 ```
 
 ```
@@ -763,36 +1142,318 @@ FROM js(
         }"
       )
 WHERE
-  chisq > 666.698756405954
-LIMIT 1000
+  chisq > 663.303467797427
+#_ORDER_BY_
 
 
-Running query:   RUNNING  2.5s
+Running query:   RUNNING  2.6s
 Running query:   RUNNING  3.2s
-Running query:   RUNNING  3.8s
-Running query:   RUNNING  4.4s
-Running query:   RUNNING  5.0s
-Running query:   RUNNING  5.7s
-Running query:   RUNNING  6.3s
-Running query:   RUNNING  6.9s
-Running query:   RUNNING  7.5s
-Running query:   RUNNING  8.2s
-Running query:   RUNNING  8.8s
-Running query:   RUNNING  9.4s
-Running query:   RUNNING 10.0s
+Running query:   RUNNING  3.9s
+Running query:   RUNNING  4.5s
+Running query:   RUNNING  5.2s
+Running query:   RUNNING  5.8s
+Running query:   RUNNING  6.4s
+Running query:   RUNNING  7.1s
+Running query:   RUNNING  7.7s
+Running query:   RUNNING  8.4s
+Running query:   RUNNING  9.0s
+Running query:   RUNNING  9.6s
+Running query:   RUNNING 10.3s
+Running query:   RUNNING 10.9s
+Running query:   RUNNING 11.5s
+Running query:   RUNNING 12.2s
+Running query:   RUNNING 12.8s
+Running query:   RUNNING 13.5s
+Running query:   RUNNING 14.1s
+Running query:   RUNNING 14.7s
+Running query:   RUNNING 15.4s
+Running query:   RUNNING 16.0s
+Running query:   RUNNING 16.7s
+Running query:   RUNNING 17.3s
+Running query:   RUNNING 17.9s
+Running query:   RUNNING 18.9s
+Running query:   RUNNING 19.6s
+Running query:   RUNNING 20.2s
+Running query:   RUNNING 20.8s
+Running query:   RUNNING 21.5s
+Running query:   RUNNING 22.1s
+Running query:   RUNNING 22.8s
+Running query:   RUNNING 23.5s
+Running query:   RUNNING 24.1s
+Running query:   RUNNING 24.8s
+Running query:   RUNNING 25.4s
+Running query:   RUNNING 26.0s
+Running query:   RUNNING 26.7s
+Running query:   RUNNING 27.3s
+Running query:   RUNNING 27.9s
+Running query:   RUNNING 28.6s
+Running query:   RUNNING 29.2s
+Running query:   RUNNING 29.9s
+Running query:   RUNNING 30.5s
+Running query:   RUNNING 31.1s
+Running query:   RUNNING 31.8s
+Running query:   RUNNING 32.4s
+Running query:   RUNNING 33.0s
+Running query:   RUNNING 33.7s
+Running query:   RUNNING 34.3s
+Running query:   RUNNING 35.0s
+Running query:   RUNNING 35.6s
+Running query:   RUNNING 36.2s
+Running query:   RUNNING 36.9s
+Running query:   RUNNING 37.5s
+Running query:   RUNNING 38.2s
+Running query:   RUNNING 38.8s
+Running query:   RUNNING 39.4s
+Running query:   RUNNING 40.1s
+Running query:   RUNNING 40.7s
+Running query:   RUNNING 41.4s
+Running query:   RUNNING 42.0s
+Running query:   RUNNING 42.7s
+Running query:   RUNNING 43.3s
+Running query:   RUNNING 43.9s
+Running query:   RUNNING 44.6s
+Running query:   RUNNING 45.2s
+Running query:   RUNNING 45.8s
+Running query:   RUNNING 46.5s
+Running query:   RUNNING 47.1s
+Running query:   RUNNING 47.8s
+Running query:   RUNNING 48.4s
+Running query:   RUNNING 49.0s
+Running query:   RUNNING 49.7s
+Running query:   RUNNING 50.3s
+Running query:   RUNNING 51.0s
+Running query:   RUNNING 51.6s
+Running query:   RUNNING 52.2s
+Running query:   RUNNING 52.9s
+Running query:   RUNNING 53.5s
+Running query:   RUNNING 54.2s
+Running query:   RUNNING 54.8s
+Running query:   RUNNING 55.4s
+Running query:   RUNNING 56.1s
+Running query:   RUNNING 56.7s
+Running query:   RUNNING 57.4s
+Running query:   RUNNING 58.0s
+Running query:   RUNNING 58.7s
+Running query:   RUNNING 59.3s
+Running query:   RUNNING 59.9s
+Running query:   RUNNING 60.6s
+Running query:   RUNNING 61.3s
+Running query:   RUNNING 61.9s
+Running query:   RUNNING 62.6s
+Running query:   RUNNING 63.2s
+Running query:   RUNNING 63.8s
+Running query:   RUNNING 64.5s
+Running query:   RUNNING 65.1s
+Running query:   RUNNING 65.8s
+Running query:   RUNNING 66.4s
+Running query:   RUNNING 67.0s
+Running query:   RUNNING 67.7s
+Running query:   RUNNING 68.3s
+Running query:   RUNNING 68.9s
+Running query:   RUNNING 69.6s
+Running query:   RUNNING 70.2s
+Running query:   RUNNING 70.9s
+Running query:   RUNNING 71.5s
+Running query:   RUNNING 72.1s
+Running query:   RUNNING 72.8s
+Running query:   RUNNING 73.4s
+Running query:   RUNNING 74.1s
+Running query:   RUNNING 74.7s
+Running query:   RUNNING 75.4s
+Running query:   RUNNING 76.0s
+Running query:   RUNNING 76.7s
+Running query:   RUNNING 77.3s
+Running query:   RUNNING 77.9s
+Running query:   RUNNING 78.6s
+Running query:   RUNNING 79.3s
+Running query:   RUNNING 79.9s
+Running query:   RUNNING 80.5s
+Running query:   RUNNING 81.2s
+Running query:   RUNNING 81.8s
+Running query:   RUNNING 82.5s
+Running query:   RUNNING 83.1s
+Running query:   RUNNING 83.8s
+Running query:   RUNNING 84.4s
+Running query:   RUNNING 85.1s
+Running query:   RUNNING 85.7s
+Running query:   RUNNING 86.3s
+Running query:   RUNNING 87.0s
+Running query:   RUNNING 87.6s
+Running query:   RUNNING 88.3s
+Running query:   RUNNING 88.9s
+Running query:   RUNNING 89.5s
+Running query:   RUNNING 90.2s
+Running query:   RUNNING 90.8s
+Running query:   RUNNING 91.4s
+Running query:   RUNNING 92.1s
+Running query:   RUNNING 92.7s
+Running query:   RUNNING 93.4s
+Running query:   RUNNING 94.0s
+Running query:   RUNNING 94.6s
+Running query:   RUNNING 95.3s
+Running query:   RUNNING 95.9s
+Running query:   RUNNING 96.5s
+Running query:   RUNNING 97.2s
+Running query:   RUNNING 97.8s
+Running query:   RUNNING 98.5s
+Running query:   RUNNING 99.1s
+Running query:   RUNNING 99.8s
+Running query:   RUNNING 100.4s
+Running query:   RUNNING 101.0s
+Running query:   RUNNING 101.7s
+Running query:   RUNNING 102.3s
+Running query:   RUNNING 102.9s
+Running query:   RUNNING 103.6s
+Running query:   RUNNING 104.2s
+Running query:   RUNNING 104.8s
+Running query:   RUNNING 105.5s
+Running query:   RUNNING 106.1s
+Running query:   RUNNING 106.8s
+Running query:   RUNNING 107.4s
+Running query:   RUNNING 108.0s
+Running query:   RUNNING 108.7s
+Running query:   RUNNING 109.4s
+Running query:   RUNNING 110.0s
+Running query:   RUNNING 110.6s
+Running query:   RUNNING 111.3s
+Running query:   RUNNING 111.9s
+Running query:   RUNNING 112.5s
+Running query:   RUNNING 113.2s
+Running query:   RUNNING 113.8s
+Running query:   RUNNING 114.5s
+Running query:   RUNNING 115.1s
+Running query:   RUNNING 115.8s
+Running query:   RUNNING 116.4s
+Running query:   RUNNING 117.1s
+Running query:   RUNNING 117.7s
+Running query:   RUNNING 118.3s
+Running query:   RUNNING 119.0s
+Running query:   RUNNING 119.6s
+Running query:   RUNNING 120.2s
+Running query:   RUNNING 120.9s
+Running query:   RUNNING 121.5s
+Running query:   RUNNING 122.2s
+Running query:   RUNNING 122.8s
+Running query:   RUNNING 123.5s
+Running query:   RUNNING 124.2s
+Running query:   RUNNING 124.9s
+Running query:   RUNNING 125.5s
+Running query:   RUNNING 126.2s
+Running query:   RUNNING 126.8s
+Running query:   RUNNING 127.5s
+Running query:   RUNNING 128.1s
+Running query:   RUNNING 128.8s
+Running query:   RUNNING 129.5s
+Running query:   RUNNING 130.1s
+Running query:   RUNNING 130.7s
+Running query:   RUNNING 131.4s
+Running query:   RUNNING 132.0s
+Running query:   RUNNING 132.6s
+Running query:   RUNNING 133.3s
+Running query:   RUNNING 133.9s
+Running query:   RUNNING 134.6s
+Running query:   RUNNING 135.2s
+Running query:   RUNNING 135.9s
+Running query:   RUNNING 136.5s
+Running query:   RUNNING 137.2s
+Running query:   RUNNING 137.8s
+Running query:   RUNNING 138.5s
+Running query:   RUNNING 139.1s
+Running query:   RUNNING 139.7s
+Running query:   RUNNING 140.4s
+Running query:   RUNNING 141.0s
+Running query:   RUNNING 141.7s
+Running query:   RUNNING 142.3s
+Running query:   RUNNING 143.0s
+Running query:   RUNNING 143.6s
+Running query:   RUNNING 144.2s
+Running query:   RUNNING 144.9s
+Running query:   RUNNING 145.5s
+Running query:   RUNNING 146.2s
+Running query:   RUNNING 146.8s
+Running query:   RUNNING 147.4s
+Running query:   RUNNING 148.1s
+Running query:   RUNNING 148.7s
+Running query:   RUNNING 149.4s
+Running query:   RUNNING 150.0s
+Running query:   RUNNING 150.6s
+Running query:   RUNNING 151.3s
+Running query:   RUNNING 151.9s
+Running query:   RUNNING 152.6s
+Running query:   RUNNING 153.2s
+Running query:   RUNNING 153.9s
+Running query:   RUNNING 154.5s
+Running query:   RUNNING 155.1s
+Running query:   RUNNING 155.8s
+Running query:   RUNNING 156.4s
+Running query:   RUNNING 157.1s
+Running query:   RUNNING 157.7s
+Running query:   RUNNING 158.4s
+Running query:   RUNNING 159.0s
+Running query:   RUNNING 159.6s
+Running query:   RUNNING 160.3s
+Running query:   RUNNING 160.9s
+Running query:   RUNNING 161.6s
+Running query:   RUNNING 162.2s
+Running query:   RUNNING 162.8s
+Running query:   RUNNING 163.5s
+Running query:   RUNNING 164.1s
+Running query:   RUNNING 164.7s
+Running query:   RUNNING 165.4s
+Running query:   RUNNING 166.0s
+Running query:   RUNNING 166.7s
+Running query:   RUNNING 167.3s
+Running query:   RUNNING 167.9s
+Running query:   RUNNING 168.6s
+Running query:   RUNNING 169.2s
+Running query:   RUNNING 169.9s
+Running query:   RUNNING 170.5s
+Running query:   RUNNING 171.2s
+Running query:   RUNNING 171.8s
+Running query:   RUNNING 172.4s
+Running query:   RUNNING 173.1s
+Running query:   RUNNING 173.7s
+Running query:   RUNNING 174.3s
+Running query:   RUNNING 175.0s
+Running query:   RUNNING 175.6s
+Running query:   RUNNING 176.3s
+Running query:   RUNNING 176.9s
+Running query:   RUNNING 177.5s
+Running query:   RUNNING 178.2s
+Running query:   RUNNING 178.8s
+Running query:   RUNNING 179.4s
+Running query:   RUNNING 180.1s
+Running query:   RUNNING 180.7s
+Running query:   RUNNING 181.4s
+Running query:   RUNNING 182.0s
+Running query:   RUNNING 182.6s
+Running query:   RUNNING 183.3s
+Running query:   RUNNING 183.9s
+Running query:   RUNNING 184.6s
+Running query:   RUNNING 185.2s
+Running query:   RUNNING 185.8s
+Running query:   RUNNING 186.5s
+Running query:   RUNNING 187.1s
+Running query:   RUNNING 187.8s
+Running query:   RUNNING 188.4s
+Running query:   RUNNING 189.0s
+Running query:   RUNNING 189.7s
+Running query:   RUNNING 190.3s
+
+Retrieving data:  2.0s
 ```
 
 Displaying the first few results:
 <!-- html table generated in R 3.1.2 by xtable 1.7-4 package -->
-<!-- Thu May 28 23:28:59 2015 -->
+<!-- Fri May 29 01:47:24 2015 -->
 <table border=1>
 <tr> <th> variant_id </th> <th> chisq </th> <th> failure_reason </th>  </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRiAgdoKIOeuxIOxpuaWMg </td> <td align="right"> 752.00 </td> <td> hardy_weinberg </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRiOgdoKILWn86jooqzZfg </td> <td align="right"> 754.00 </td> <td> hardy_weinberg </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRiKgtoKIMSDhYD_yNP-Tg </td> <td align="right"> 761.00 </td> <td> hardy_weinberg </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjig9oKINzC9LuTzcbRsAE </td> <td align="right"> 747.00 </td> <td> hardy_weinberg </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRjug9oKIK6R-Zv2gZ-jnwE </td> <td align="right"> 750.00 </td> <td> hardy_weinberg </td> </tr>
-  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWRi1hdoKIKzTlYDwv6zkkQE </td> <td align="right"> 851.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBjiwqwJINj4hrDW9uC9qQE </td> <td align="right"> 687.30 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBj1w6wJIIjmgdqrkczy2wE </td> <td align="right"> 880.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyNBjivrwCIKHL-ND5vLiFUw </td> <td align="right"> 881.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBjhpI4_IPbu9N6a2YTzxwE </td> <td align="right"> 881.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBjDhrYWIP3N0OOsj52_Dw </td> <td align="right"> 881.00 </td> <td> hardy_weinberg </td> </tr>
+  <tr> <td> CJ_JqPj1p5_yIRIEY2hyWBjlookNIOrX7K-EzOHlCw </td> <td align="right"> 752.18 </td> <td> hardy_weinberg </td> </tr>
    </table>
 
 

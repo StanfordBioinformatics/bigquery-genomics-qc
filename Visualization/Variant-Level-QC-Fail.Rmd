@@ -44,8 +44,6 @@ queryReplacements <- list("_THE_TABLE_"="va_aaa_pilot_data.all_genomes_gvcfs_201
                           "_THE_EXPANDED_TABLE_"="va_aaa_pilot_data.all_genomes_expanded_vcfs_java3",
                           "_PATIENT_INFO_"="va_aaa_pilot_data.patient_info",
                           "_BLACKLISTED_TABLE_"="resources.blacklisted_positions")
-sampleData <- read.csv("./data/patient_info.csv")
-sampleInfo <- select(sampleData, call_call_set_name=Catalog.ID, gender=Gender)
 ```
 
 ## Missingness Rate
@@ -55,11 +53,11 @@ Identify all variants with a missingness rate greater than a specified cutoff.
 ```{r message=FALSE, warning=FALSE, comment=NA}
 cutoff = list("_CUTOFF_"="0.1")
 sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
+outputTable = 'qc_tables.variant_missingness'
 result <- DisplayAndDispatchQuery("../sql/variant-level-missingness-fail.sql",
                                   project=project,
-                                  replacements=c(cutoff,
-                                                 queryReplacements,
-                                                 sortAndLimit))
+                                  replacements=c(cutoff, queryReplacements),
+                                  outputTable=outputTable)
 ```
 Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
 
@@ -77,9 +75,11 @@ if(is.null(result)) {
 ```{r message=FALSE, warning=FALSE, comment=NA}
 query <- "../sql/blacklisted-variants.sql"
 sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
+outputTable = 'qc_tables.blacklisted'
 result <- DisplayAndDispatchQuery(query,
                                   project=project,
-                                  replacements=c(queryReplacements, sortAndLimit))
+                                  replacements=c(queryReplacements),
+                                  outputTable=outputTable)
 ```
 
 Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
@@ -93,11 +93,12 @@ print(xtable(head(result)), type="html", include.rownames=F)
 For each variant within the X and Y chromosome, identify heterozygous variants in male genomes.
 
 ```{r message=FALSE, warning=FALSE, comment=NA}
-sortAndLimit <- "LIMIT 1000"
+sortAndLimit <- list("_LIMIT_" = "LIMIT 1000")
+outputTable = 'qc_tables.heterozygous_haplotype'
 result <- DisplayAndDispatchQuery("../sql/sex-chromosome-heterozygous-haplotypes.sql",
                                   project=project,
-                                  replacements=c("#_ORDER_BY_"=sortAndLimit,
-                                                 queryReplacements))
+                                  replacements=c(queryReplacements),
+                                  outputTable=outputTable)
 ```
 Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
 
@@ -117,9 +118,11 @@ sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
 max <- 3.0
 min <- 1.5
 cutoffs <- list("_MAX_" = max, "_MIN_" = min)
+outputTable = 'qc_tables.titv_genomic_window'
 result <- DisplayAndDispatchQuery(query,
                                   project=project,
-                                  replacements=c(queryReplacements, cutoffs, sortAndLimit))
+                                  replacements=c(queryReplacements, cutoffs),
+                                  outputTable=outputTable)
 ```
 
 Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
@@ -138,9 +141,11 @@ max <- 3
 min <- 1.5
 cutoffs <- list("_MAX_" = max, "_MIN_" = min)
 sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
+outputTable = 'qc_tables.titv_depth'
 result <- DisplayAndDispatchQuery(query,
                                   project=project,
-                                  replacements=c(queryReplacements, cutoffs, sortAndLimit))
+                                  replacements=c(queryReplacements, cutoffs),
+                                  outputTable)
 ```
 
 Number of rows returned by this query: **`r if(is.null(result)) { "None" } else { nrow(result) }`**.
@@ -150,27 +155,6 @@ First few results
 print(xtable(head(result)), type="html", include.rownames=F)
 ```
 
-Generate query replacement to retreive variant ids for each sample/depth pair that is outside our cutoffs.
-```{r}
-# Format
-#  (call.call_set_name = 'LP6005692-DNA_B08' AND call.DP = 112)
-result$query = paste("(call.call_set_name = '", result$sample_id, "' AND call.DP = ", result$depth, ")", sep='')
-sampleReplacement = list("_SAMPLE_DEPTH_" = paste(result$query, collapse = ' OR '))
-```
-
-Run query to retreive all variant ids for variants failing ti/tv by depth
-```{r message=FALSE, warning=FALSE, comment=NA}
-query <- "../sql/titv-by-depth-fail-variants.sql"
-sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
-result <- DisplayAndDispatchQuery(query,
-                                  project=project,
-                                  replacements=c(queryReplacements, sampleReplacement, sortAndLimit))
-```
-
-First few results
-```{r echo=FALSE, message=FALSE, warning=FALSE, comment=NA, results="asis"}
-print(xtable(head(result)), type="html", include.rownames=F)
-```
 
 ## Ti/Tv By Alternate Allele Counts
 Collect all the alternate allele counts that are outside our desired range.
@@ -217,9 +201,11 @@ Determine which genomes are outside our desired range
 ```{r message=FALSE, warning=FALSE, comment=NA}
 values = list("_CUTOFF_" = maxChiSq)
 sortAndLimit <- list("#_ORDER_BY_" = "LIMIT 1000")
+outputTable = 'qc_tables.hardy_weinberg'
 result <- DisplayAndDispatchQuery("../sql/hwe-fail.sql",
                                   project=project,
-                                  replacements=c(queryReplacements, values, sortAndLimit))
+                                  replacements=c(queryReplacements, values),
+                                  outputTable=outputTable)
 ```
 
 Displaying the first few results:

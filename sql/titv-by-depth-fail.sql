@@ -1,5 +1,19 @@
+SELECT 
+  variant_id,
+  titv.titv_ratio,
+  "titv_by_depth" AS failure_reason,
+FROM(
 SELECT
-*
+  call.call_set_name AS sample_id,
+  variant_id,
+  call.DP AS depth,
+FROM(FLATTEN((
+  [_THE_EXPANDED_TABLE_]), call.call_set_name))) AS var
+JOIN (
+SELECT
+  sample_id,
+  titv_ratio,
+  depth,
   FROM (
     SELECT
     call.call_set_name AS sample_id,
@@ -13,7 +27,6 @@ SELECT
                        'A->T', 'T->A', 'C->G', 'G->C')) AS transversions,
       call.DP,
       FROM (
-        
         SELECT
         call.call_set_name,
         CONCAT(reference_bases, CONCAT(STRING('->'), alternate_bases)) AS mutation,
@@ -49,7 +62,9 @@ SELECT
     titv_ratio,
     depth,)
 WHERE
-titv_ratio > _MAX_ 
-OR titv_ratio < _MIN_
+titv_ratio > _MAX_
+OR titv_ratio < _MIN_) AS titv
+ON
+  var.sample_id = titv.sample_id
+  AND var.depth = titv.depth
 #_ORDER_BY_
-
