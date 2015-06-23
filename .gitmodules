@@ -1,0 +1,3 @@
+[submodule "mvp_aaa_codelabs"]
+	path = mvp_aaa_codelabs
+	url = https://github.com/StanfordBioinformatics/mvp_aaa_codelabs
