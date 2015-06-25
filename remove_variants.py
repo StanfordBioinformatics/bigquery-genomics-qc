@@ -44,6 +44,11 @@ def parse_command_line():
     if options.sample_id is None and options.sample_file is None and options.variant_file is None:
         print "Exiting, nothing to remove.\nSpecify samples, variants, or both."
         exit(0)
+
+    if options.variant_file is not None:
+        print "Variant flagging has been disabled for now."
+        exit(0)
+
     return options
 
 if __name__ == "__main__":

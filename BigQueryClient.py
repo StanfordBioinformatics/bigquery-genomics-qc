@@ -31,21 +31,50 @@ class BigQuery(object):
         self.service = client.bigquery_setup()
         self.project_number = project_number
 
-    def run(self, query):
+    def run(self, query, table_output=False):
         logging.debug("Querying BigQuery")
-        response = self.execute_query(query)
-        if self.check_response(response) is False:
-            return False
+        logging.debug(query)
+        response = self.execute_query(query, table_output)
+        print response
+        if table_output is False:
+            if self.check_response(response) is False:
+                return False
+        else:
+            if self.check_insert(response) is True:
+                job_id = self.get_job_id(response)
+                return job_id
+            else:
+                return False
+
         result = self.parse_bq_response(response)
         return result
 
     # Run a query on BigQuery
-    # todo allow for large resonse
-    def execute_query(self, query):
-        query_dict = {'query': query, 'timeoutMs': 600000}
+    def execute_query(self, query, query_name, table_output=False):
+        query_dict = {}
+        if table_output is False:
+            query_dict = {'query': query, 'timeoutMs': 600000}
+        else:
+            query_dict = {
+                'configuration': {
+                    'query': {'query': query,
+                        'allowLargeResults': 'true',
+                        'destinationTable': {
+                            'projectId': 'gbsc-gcp-project-mvp',
+                            'datasetId': 'qc_tables',
+                            'tableId': query_name
+                        }
+                    }
+                }
+            }
+
         query_request = self.service.jobs()
         try:
-            query_response = query_request.query(projectId=self.project_number, body=query_dict).execute()
+            query_response = None
+            if table_output is False:
+                query_response = query_request.query(projectId=self.project_number, body=query_dict).execute()
+            else:
+                query_response = query_request.insert(projectId=self.project_number, body=query_dict).execute()
             return query_response
         except Exception as e:
             logging.error("Unable to execute query: %s" % e)
@@ -79,6 +108,8 @@ class BigQuery(object):
     # Check for valid response
     # todo add more checks
     def check_response(self, response):
+        if response is None:
+            logging.error("No Response)")
         if 'jobComplete' in response:
             if response['jobComplete'] is True:
                 return True
@@ -86,3 +117,29 @@ class BigQuery(object):
                 logging.error("Query timed out")
                 exit(0)
         return False
+
+    def get_job_id(self, response):
+        job_reference =  response[u'jobReference']
+        id = job_reference[u'jobId']
+        return id
+
+    def check_insert(self, response):
+        status = response[u'status']
+        if status[u'errors']:
+            return False
+        return True
+
+    def poll_job(self, job_id):
+        state = 'RUNNING'
+        while state == 'RUNNING':
+            state = self.get_job_status(job_id)
+            sleep(5)
+        return state
+
+    def get_job_status(self, job_id):
+        service = self.service.jobs()
+        response = service.get(projectId=self.project_number, jobId=job_id).execute()
+        if 'status' not in response:
+            return False
+        state = response['status']['state']
+        return state

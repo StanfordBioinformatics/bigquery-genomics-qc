@@ -2,13 +2,16 @@ SELECT
   variant_id,
   titv.titv_ratio,
   "titv_by_depth" AS failure_reason,
+  var.sample_id AS sample_id,
 FROM(
 SELECT
   call.call_set_name AS sample_id,
   variant_id,
   call.DP AS depth,
+  GROUP_CONCAT(STRING(call.genotype)) WITHIN call AS genotype
 FROM(FLATTEN((
-  [_THE_EXPANDED_TABLE_]), call.call_set_name))) AS var
+  [va_aaa_pilot_data.all_genomes_expanded_vcfs_java3]), call.call_set_name))
+OMIT call IF EVERY(call.genotype <= 0)) AS var
 JOIN (
 SELECT
   sample_id,

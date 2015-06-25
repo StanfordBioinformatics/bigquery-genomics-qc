@@ -6,6 +6,7 @@ from config import Config
 from GoogleGenomicsClient import GoogleGenomicsClient
 import logging
 import time
+from pyflow import WorkflowRunner
 
 class GenomicsQC(object):
     def __init__(self, verbose=False, client_secrets=None, project_number=None, dataset=None, variant_table=None,
@@ -54,50 +55,74 @@ class GenomicsQC(object):
 
     #### Specific types of QC functions ####
     # Sample level QC
-    def sample_qc(self):
+    def sample_qc(self, remove=False):
         logging.info("Running Sample Level QC")
         queries = Queries.SAMPLE_LEVEL_QC_QUERIES
         for q in queries:
             logging.debug(q)
-            result = self.run_analysis(query_file=q, level='sample')
+            result = self.run_analysis(query_file=q)
             self.collect_failed_samples(result, q)
-        self.remove_failed_samples(self.failed_samples)
+        if remove is True:
+            self.remove_failed_samples(self.failed_samples)
 
     # Variant level QC
-    def variant_qc(self):
+    def variant_qc(self, poll=False):
         logging.info("Running Variant Level QC")
         queries = Queries.VARIANT_LEVEL_QC_QUERIES
+        job_ids = []
         for q in queries:
             logging.debug(q)
-            result = self.run_analysis(query_file=q, level='variant')
+            id = self.run_analysis(query_file=q, table_ouput=True)
+            if id is None:
+                logging.error("Query insert failed: %s" % self.query_name(q))
+                print "Query insert failed: %s" % self.query_name(q)
+            else:
+                job_ids.append(bq.get_job_id(result))
+        logging.debug("All queries submitted.")
+        if poll is True:
+            logging.debug("Waiting for query completion")
+            self.poll_jobs(job_ids)
+
+
             # Determine if entire position needs to be removed or remove call for a specific sample
-            if Queries.VARIANT_LEVEL_REMOVAL[q] == 'sample_call':
-                self.collect_failed_sample_calls(result, q)
-            elif Queries.VARIANT_LEVEL_REMOVAL[q] == 'position':
-                self.collect_failed_positions(result, q)
-        self.remove_failed_sample_calls(self.failed_sample_calls)
-        self.remove_failed_positions(self.failed_positions)
+            #if Queries.VARIANT_LEVEL_REMOVAL[q] == 'sample_call':
+            #    self.collect_failed_sample_calls(result, q)
+            #elif Queries.VARIANT_LEVEL_REMOVAL[q] == 'position':
+            #    self.collect_failed_positions(result, q)
+        #self.remove_failed_sample_calls(self.failed_sample_calls)
+        #self.remove_failed_positions(self.failed_positions)
 
     # Run all required analysis for each query
-    def run_analysis(self, query_file, level):
-        cutoffs = None
-        # Check if this query requires cutoffs to be defined by average values
-        if query_file in Queries.AVERAGE_STDDEV:
-            prequery = Queries.AVERAGE_STDDEV[query_file]
-            logging.debug("Prequery required: %s" % prequery)
-            cutoffs = self.average_stddev_cutoffs(prequery)
+    def run_analysis(self, query_file, table_ouput=False):
+        cutoffs = self.custom_cutoffs(query_file)
         query = self.prepare_query(query_file, preset_cutoffs=cutoffs)
-        result = self.bq.run(query)
+        query_name = self.query_name(query_file)
+        print query_name
+        result = self.bq.run(query, query_name=query_name, table_output=table_ouput)
         return result
 
     #### Query set up ####
+    # Get the root name of the query file
+    def query_name(self, query_file):
+        return query_file.split('.')[0]
+
     # Set up the query, read it in, apply substitutions
     def prepare_query(self, query_file, preset_cutoffs=None):
         logging.debug("Preparing query: %s" % query_file)
         raw_query = self.get_query(query_file)
+        other_subs = {}
         if preset_cutoffs is None:
             preset_cutoffs = self.get_preset_cutoffs(query_file)
-        query = self.query_substitutions(raw_query, other=preset_cutoffs)
+            if preset_cutoffs is not None:
+                for key in preset_cutoffs:
+                    other_subs[key] = preset_cutoffs[key]
+        else:
+            for key in preset_cutoffs:
+                other_subs[key] = preset_cutoffs[key]
+        main_query = self.main_query(query_file)
+        if main_query is not None:
+            other_subs['_MAIN_QUERY_'] = main_query
+        query = self.query_substitutions(raw_query, other=other_subs)
         return query
 
     # Read raw query in from file
@@ -123,6 +148,23 @@ class GenomicsQC(object):
                 query = query.replace(r, other[r])
         return query
 
+    # Check if a query requires a main query substitution
+    def main_query(self, query_file):
+        if query_file in Queries.MAIN_QUERY:
+            main_query = Queries.MAIN_QUERY[query_file]
+            prepped_main = self.prepare_query(main_query)
+            return prepped_main
+        return None
+
+    def custom_cutoffs(self, query_file):
+        cutoffs = None
+        # Check if this query requires cutoffs to be defined by average values
+        if query_file in Queries.AVERAGE_STDDEV:
+            prequery = Queries.AVERAGE_STDDEV[query_file]
+            logging.debug("Prequery required: %s" % prequery)
+            cutoffs = self.average_stddev_cutoffs(prequery)
+        return cutoffs
+
     # Get preset cutoffs from query file
     def get_preset_cutoffs(self, query):
         cutoffs = None
@@ -134,7 +176,8 @@ class GenomicsQC(object):
     def average_stddev_cutoffs(self, query_file):
         logging.debug("Getting average and standard deviation")
         query = self.prepare_query(query_file)
-        result = self.bq.run(query)
+        query_name = self.query_name(query_file)
+        result = self.bq.run(query, query_name=query_name)
         average, stddev = self.get_average_stddev(result)
         logging.debug("Average: %s, Standard Deviation: %s" % (average, stddev))
         max, min = self.calculate_max_min(average, stddev)
@@ -191,14 +234,15 @@ class GenomicsQC(object):
     # Add failed samples to total
     def collect_failed_samples(self, result, query):
         logging.debug("Collecting failed samples.")
+        query_name = self.query_name(query)
         if result is None:
             return
         for r in result:
             sample_id = r['sample_id']
             if sample_id in self.failed_samples:
-                self.failed_samples[sample_id].append(query)
+                self.failed_samples[sample_id].append(query_name)
             else:
-                self.failed_samples[sample_id] = [query]
+                self.failed_samples[sample_id] = [query_name]
 
     # Add failed positions to total
     def collect_failed_positions(self, result, query):
@@ -277,9 +321,11 @@ class GenomicsQC(object):
     def remove_sample(self, sample_id):
         logging.debug("Removing sample: %s" % sample_id)
         call_set_id = self.gg.get_call_set_id(sample_id)
+
         if call_set_id is None:
             logging.error("Failed to retrieve call set id for %s." % sample_id)
             return None
+        logging.debug("callset id: %s" % call_set_id)
         self.gg.delete_call_set(call_set_id)
 
     # Remove an entire position from a variant set
@@ -293,7 +339,7 @@ class GenomicsQC(object):
     # Remove a variant of a specific call from a variant set
     def remove_sample_call(self, sample_id, reference_name, start, end):
         logging.debug("Removing call: %s %s %s %s" % (sample_id, reference_name, start, end))
-        # todo
+        # todo figure this out
         return None
 
     #### Printing ####
@@ -319,3 +365,11 @@ class GenomicsQC(object):
         # todo write to file
         logging.basicConfig(filename='genomics-qc.%s.log' % self.date,
                             format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s', level=log_level)
+
+    def poll_jobs(self, ids):
+        for query in ids:
+            id = ids[query]
+            logging.debug("Entering polling for %s" % query)
+            result = bq.poll_job(id)
+            logging.info("Query complete: %s %s" % (query, result))
+        logging.debug("Polling complete")

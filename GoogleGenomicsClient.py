@@ -62,13 +62,13 @@ class GoogleGenomicsClient(object):
         return None
 
     def delete_call_set(self, call_set_id):
-        print "Deleting sample %s" % call_set_id
+        logging.debug("Deleting sample %s" % call_set_id)
         # todo: not executing until testing is complete
-        #request = self.service.callsets().delete(
-        #    callSetId=call_set_id
-        #)
-        #response = self.execute(request)
-        #print response
+        request = self.service.callsets().delete(
+            callSetId=call_set_id
+        )
+        response = self.execute(request)
+        print response
 
     def get_variant_id(self, reference_name, start, end):
         request = self.service.variants().search(
