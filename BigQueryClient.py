@@ -4,6 +4,8 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client import tools
 import logging
+from time import sleep
+
 
 class BigQueryClient(object):
     def __init__(self, client_secrets):
@@ -26,16 +28,17 @@ class BigQueryClient(object):
         return bigquery_service
 
 class BigQuery(object):
-    def __init__(self, project_number, client_secrets):
+    def __init__(self, project_number, client_secrets, qc_dataset=None, project_name=None):
         client = BigQueryClient(client_secrets)
         self.service = client.bigquery_setup()
         self.project_number = project_number
+        self.project_name = project_name
+        self.qc_dataset = qc_dataset
 
-    def run(self, query, table_output=False):
+    def run(self, query, query_name, table_output=False):
         logging.debug("Querying BigQuery")
         logging.debug(query)
-        response = self.execute_query(query, table_output)
-        print response
+        response = self.execute_query(query, query_name, table_output)
         if table_output is False:
             if self.check_response(response) is False:
                 return False
@@ -60,8 +63,8 @@ class BigQuery(object):
                     'query': {'query': query,
                         'allowLargeResults': 'true',
                         'destinationTable': {
-                            'projectId': 'gbsc-gcp-project-mvp',
-                            'datasetId': 'qc_tables',
+                            'projectId': self.project_name,
+                            'datasetId': self.qc_dataset,
                             'tableId': query_name
                         }
                     }
@@ -125,7 +128,8 @@ class BigQuery(object):
 
     def check_insert(self, response):
         status = response[u'status']
-        if status[u'errors']:
+        if u'errors' in status:
+            logging.error("BigQuery Error: %s" % status[u'errors'])
             return False
         return True
 
@@ -133,7 +137,8 @@ class BigQuery(object):
         state = 'RUNNING'
         while state == 'RUNNING':
             state = self.get_job_status(job_id)
-            sleep(5)
+            if state == 'RUNNING':
+                sleep(5)
         return state
 
     def get_job_status(self, job_id):

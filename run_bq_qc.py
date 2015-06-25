@@ -1,16 +1,16 @@
 import argparse
 from BigQueryGenomicsQC import GenomicsQC
 
-def RunQC(verbose= False, sample_level=False, variant_level=False, client_secrets=None, project_number=None,
-          dataset=None, variant_table=None, expanded_table=None):
+def RunQC(verbose= False, sample_level=False, remove_samples=False, variant_level=False, client_secrets=None, project_number=None,
+          dataset=None, variant_table=None, expanded_table=None, poll=False):
 
     qc = GenomicsQC(verbose=verbose, client_secrets=client_secrets, project_number=project_number, dataset=dataset,
                     variant_table=variant_table, expanded_table=expanded_table)
 
     if sample_level is True:
-        qc.sample_qc()
+        qc.sample_qc(remove=remove_samples)
     if variant_level is True:
-        qc.variant_qc()
+        qc.variant_qc(poll)
 
 def parse_command_line():
     parser = argparse.ArgumentParser(
@@ -22,6 +22,10 @@ def parse_command_line():
                                 help="Run sample level qc.")
     parser.add_argument("--variant_qc", action='store_true', default=False,
                                 help="Run variant level qc.")
+    parser.add_argument("--remove-samples", action='store_true', default=False,
+                                help="Remove samples from dataset.")
+    parser.add_argument("--wait_for_completion", action='store_true', default=False,
+                                help="Wait for completion of queries before exiting. Only applicable for variant qc")
     parser.add_argument("--variant_table", default=None,
                                 help="OPTIONAL. Variant table to query. Defaults to value in config.py")
     parser.add_argument("--expanded_table", default=None,
@@ -46,4 +50,5 @@ if __name__ == "__main__":
     options = parse_command_line()
     RunQC(sample_level=options.sample_qc, variant_level=options.variant_qc, verbose=options.verbose,
           client_secrets=options.client_secrets, project_number=options.project_number, dataset=options.dataset,
-          variant_table=options.variant_table, expanded_table=options.expanded_table)
+          variant_table=options.variant_table, expanded_table=options.expanded_table,
+          remove_samples=options.remove_samples, poll=options.wait_for_completion)

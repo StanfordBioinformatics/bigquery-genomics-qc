@@ -1,7 +1,12 @@
+from config import Config
 
 class Queries(object):
+    # Sample level qc queries
     GENDER_CHECK = "gender-check-fail.sql"
     GENOTYPING_CONCORDANCE = "genotyping-conconcordance-fail.sql"
+    HETEROZYGOSITY = "heterozygous-call-counts-fail.sql"
+    HETEROZYGOSITY_METRICS = "heterozygous-call-counts-metrics.sql"
+    HETEROZYGOSITY_MAIN = "heterozygous-calls-count.sql"
     INBREEDING_COEFFICIENT = "inbreeding-coefficient-fail.sql"
     INBREEDING_COEFFICIENT_METRICS = "inbreeding-coefficient-metrics.sql"
     INBREEDING_COEFFICIENT_MAIN = "homozygous-variants.sql"
@@ -9,32 +14,45 @@ class Queries(object):
     PRIVATE_VARIANTS = "private-variants-fail.sql"
     PRIVATE_VARIANT_METRICS = "private-variants-metrics.sql"
     PRIVATE_VARIANT_MAIN = "private-variants.sql"
-    VARIANT_DEPTH = "variant-depth-fail.sql"
+
+    # Variant level qc queries
+    BLACKLISTED = "blacklisted-variants.sql"
+    HARDY_WEINBERG = "hwe-fail.sql"
+    HARDY_WEINBERG_METRICS = "hwe-quantile.sql"
+    HETERZYGOUS_HAPLOTYPE = "sex-chromosome-heterozygous-haplotypes.sql"
     MISSINGNESS_VARIANT_LEVEL = "variant-level-missingness-fail.sql"
-    HETEROZYGOSITY = "heterozygous-call-counts-fail.sql"
-    HETEROZYGOSITY_METRICS = "heterozygous-call-counts-metrics.sql"
-    HETEROZYGOSITY_MAIN = "heterozygous-calls-count.sql"
+    TITV_DEPTH = "titv-by-depth-fail.sql"
+    TITV_GENOMIC_WINDOW = "titv-by-genomic-window-fail.sql"
 
     SAMPLE_LEVEL_QC_QUERIES = [GENDER_CHECK,
-                               #GENOTYPING_CONCORDANCE,
+                               GENOTYPING_CONCORDANCE,
                                INBREEDING_COEFFICIENT,
                                MISSINGNESS_SAMPLE_LEVEL,
                                PRIVATE_VARIANTS,
-                               HETEROZYGOSITY
-    ]
+                               HETEROZYGOSITY]
 
-    VARIANT_LEVEL_QC_QUERIES = [VARIANT_DEPTH,
-                                MISSINGNESS_VARIANT_LEVEL]
+    VARIANT_LEVEL_QC_QUERIES = [BLACKLISTED,
+                                HARDY_WEINBERG,
+                                HETERZYGOUS_HAPLOTYPE,
+                                MISSINGNESS_VARIANT_LEVEL,
+                                TITV_DEPTH,
+                                TITV_GENOMIC_WINDOW]
 
     VARIANT_LEVEL_REMOVAL = {
-        VARIANT_DEPTH: 'sample_call',
-        MISSINGNESS_VARIANT_LEVEL: 'position'
-    }
+        BLACKLISTED: 'position',
+        HARDY_WEINBERG: 'position',
+        HETERZYGOUS_HAPLOTYPE: 'sample_call',
+        MISSINGNESS_VARIANT_LEVEL: 'position',
+        TITV_DEPTH: 'sample_call',
+        TITV_GENOMIC_WINDOW: 'position'}
 
     AVERAGE_STDDEV = {
         PRIVATE_VARIANTS: PRIVATE_VARIANT_METRICS,
         INBREEDING_COEFFICIENT: INBREEDING_COEFFICIENT_METRICS,
-        HETEROZYGOSITY: HETEROZYGOSITY_METRICS
+        HETEROZYGOSITY: HETEROZYGOSITY_METRICS}
+
+    CUTOFF = {
+        HARDY_WEINBERG: HARDY_WEINBERG_METRICS
     }
 
     MAIN_QUERY = {
@@ -43,8 +61,7 @@ class Queries(object):
         INBREEDING_COEFFICIENT: INBREEDING_COEFFICIENT_MAIN,
         INBREEDING_COEFFICIENT_METRICS: INBREEDING_COEFFICIENT_MAIN,
         HETEROZYGOSITY: HETEROZYGOSITY_MAIN,
-        HETEROZYGOSITY_METRICS: HETEROZYGOSITY_MAIN
-    }
+        HETEROZYGOSITY_METRICS: HETEROZYGOSITY_MAIN}
 
     PRESET_CUTOFFS = {
         GENOTYPING_CONCORDANCE: {"_CUTOFF_": "0.95"},
@@ -52,6 +69,11 @@ class Queries(object):
                        "_FEMALE_CUTOFF_": "0.5"},
         MISSINGNESS_SAMPLE_LEVEL: {"_CUTOFF_": "0.9"},
         MISSINGNESS_VARIANT_LEVEL: {"_CUTOFF_": "0.9"},
-        VARIANT_DEPTH: {"_MAX_VALUE_": "70",
-                        "_MIN_VALUE_": "8"}
+        TITV_DEPTH: {"_MAX_": "3.0",
+                              "_MIN_": "1.5"},
+        TITV_GENOMIC_WINDOW: {"_MAX_": "3.0",
+                              "_MIN_": "1.5"},
+        BLACKLISTED: {"_BLACKLISTED_TABLE_": Config.BLACKLISTED_TABLE},
+        HARDY_WEINBERG_METRICS: {"_QUANTILE_": "1999"}
+
     }
