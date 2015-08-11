@@ -1,8 +1,11 @@
+#!/usr/bin/python
 import argparse
+import json
 from BigQueryGenomicsQC import GenomicsQC
+from BigQueryGenomicsQC import QCSteps
 
 def RunQC(verbose= False, sample_level=False, remove_samples=False, variant_level=False, client_secrets=None, project_number=None,
-          dataset=None, variant_table=None, expanded_table=None, poll=False):
+          dataset=None, variant_table=None, expanded_table=None, poll=False, qc_step=None):
 
     qc = GenomicsQC(verbose=verbose, client_secrets=client_secrets, project_number=project_number, dataset=dataset,
                     variant_table=variant_table, expanded_table=expanded_table)
@@ -11,6 +14,9 @@ def RunQC(verbose= False, sample_level=False, remove_samples=False, variant_leve
         qc.sample_qc(remove=remove_samples)
     if variant_level is True:
         qc.variant_qc(poll)
+
+    if qc_step is not None:
+        qc.custom_list(qc_step)
 
 def parse_command_line():
     parser = argparse.ArgumentParser(
@@ -22,6 +28,11 @@ def parse_command_line():
                                 help="Run sample level qc.")
     parser.add_argument("--variant_qc", action='store_true', default=False,
                                 help="Run variant level qc.")
+    parser.add_argument("--qc", nargs='+', default=None,
+                                help="Pass a list of qc steps to run.  Valid qc steps include: gender_check, "
+                                     "genotyping_concordance, heterozygosity_rate, inbreeding_coefficient, "
+                                     "missingness_rate, singletons, blacklisted, hardy_weinberg, heterozygous_haplotype,"
+                                     "titv_by_depth, titv_by_genomic_window.")
     parser.add_argument("--remove-samples", action='store_true', default=False,
                                 help="Remove samples from dataset.")
     parser.add_argument("--wait_for_completion", action='store_true', default=False,
@@ -41,8 +52,9 @@ def parse_command_line():
                                      "API Client.")
 
     options = parser.parse_args()
-    if options.sample_qc is False and options.variant_qc is False:
-        print "Exiting, no qc specified.\nSpecify sample qc, variant qc, or both.\n--sample_qc and/or --variant_qc"
+    if options.sample_qc is False and options.variant_qc is False and options.qc is None:
+        print "Exiting, no qc specified.\nSpecify sample qc, variant qc, or both.\n--sample_qc and/or --variant_qc." \
+              "Individual QC steps can be run using --qc"
         exit(0)
     return options
 
@@ -51,4 +63,4 @@ if __name__ == "__main__":
     RunQC(sample_level=options.sample_qc, variant_level=options.variant_qc, verbose=options.verbose,
           client_secrets=options.client_secrets, project_number=options.project_number, dataset=options.dataset,
           variant_table=options.variant_table, expanded_table=options.expanded_table,
-          remove_samples=options.remove_samples, poll=options.wait_for_completion)
+          remove_samples=options.remove_samples, poll=options.wait_for_completion, qc_step=options.qc)

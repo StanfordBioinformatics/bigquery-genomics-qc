@@ -6,7 +6,6 @@ from oauth2client import tools
 import logging
 from time import sleep
 
-
 class BigQueryClient(object):
     def __init__(self, client_secrets):
         self.client_secret_path = client_secrets
@@ -56,7 +55,7 @@ class BigQuery(object):
     def execute_query(self, query, query_name, table_output=False):
         query_dict = {}
         if table_output is False:
-            query_dict = {'query': query, 'timeoutMs': 600000}
+            query_dict = {'query': query, 'timeoutMs': 1000000}
         else:
             query_dict = {
                 'configuration': {

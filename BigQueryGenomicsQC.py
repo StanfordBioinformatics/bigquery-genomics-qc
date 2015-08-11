@@ -6,6 +6,7 @@ from config import Config
 from GoogleGenomicsClient import GoogleGenomicsClient
 import logging
 import time
+import json
 from pyflow import WorkflowRunner
 
 class GenomicsQC(object):
@@ -51,233 +52,36 @@ class GenomicsQC(object):
                                        project_number=self.project_number,
                                        dataset=self.dataset)
 
-        # Empty dictionaries for failures
-        self.failed_samples = {}
-        self.failed_positions = {}
-        self.failed_sample_calls = {}
+        self.queries = QCSteps(verbose=verbose, client_secrets=self.client_secrets_path,
+                               project_number=self.project_number, dataset=self.dataset,
+                               variant_table=self.variant_table, expanded_table=self.expanded_table)
 
     #### Specific types of QC functions ####
     # Sample level QC
     def sample_qc(self, remove=False):
         logging.info("Running Sample Level QC")
-        queries = Queries.SAMPLE_LEVEL_QC_QUERIES
-        for q in queries:
-            logging.debug(q)
-            result = self.run_analysis(query_file=q)
-            self.collect_failed_samples(result, q)
+        failed_samples = self.queries.sample_level_qc()
         if remove is True:
             self.remove_failed_samples(self.failed_samples)
+        self.print_removed(failed_samples, 'samples')
 
     # Variant level QC
     def variant_qc(self, poll=False):
         logging.info("Running Variant Level QC")
-        queries = Queries.VARIANT_LEVEL_QC_QUERIES
-        job_ids = {}
-        for q in queries:
-            logging.debug(q)
-            id = self.run_analysis(query_file=q, table_ouput=True)
-            if id is None:
-                logging.error("Query insert failed: %s" % self.query_name(q))
-                print "Query insert failed: %s" % self.query_name(q)
-            else:
-                job_ids[self.query_name(q)] = id
-        logging.debug("All queries submitted.")
+        self.queries.variant_level_qc()
         if poll is True:
             logging.debug("Waiting for query completion")
             self.poll_jobs(job_ids)
 
-    # Run all required analysis for each query
-    def run_analysis(self, query_file, table_ouput=False):
-        query_name = self.query_name(query_file)
-        print query_name
-        cutoffs = self.custom_cutoffs(query_file)
-        query = self.prepare_query(query_file, preset_cutoffs=cutoffs)
-        result = self.bq.run(query, query_name=query_name, table_output=table_ouput)
-        return result
-
-    #### Query set up ####
-    # Get the root name of the query file
-    def query_name(self, query_file):
-        query_name = query_file.split('.')[0]
-        query_name = query_name.replace("-", "_")
-        return query_name
-
-    # Set up the query, read it in, apply substitutions
-    def prepare_query(self, query_file, preset_cutoffs=None):
-        logging.debug("Preparing query: %s" % query_file)
-        raw_query = self.get_query(query_file)
-        other_subs = {}
-        if preset_cutoffs is None:
-            preset_cutoffs = self.get_preset_cutoffs(query_file)
-            if preset_cutoffs is not None:
-                for key in preset_cutoffs:
-                    other_subs[key] = preset_cutoffs[key]
-        else:
-            for key in preset_cutoffs:
-                other_subs[key] = preset_cutoffs[key]
-        main_query = self.main_query(query_file)
-        if main_query is not None:
-            other_subs['_MAIN_QUERY_'] = main_query
-        query = self.query_substitutions(raw_query, other=other_subs)
-        return query
-
-    # Read raw query in from file
-    def get_query(self, file):
-        path = os.path.join(self.query_repo, file)
-        query = ''
-        with open (path, "r") as f:
-            query = f.read()
-        return query
-
-    # Apply any substitutions. Substitutions set on other must be in a dictionary
-    def query_substitutions(self, query, other=None):
-        replacements = {
-            "_THE_TABLE_": Config.VARIANT_TABLE,
-            "_THE_EXPANDED_TABLE_": Config.EXPANDED_TABLE,
-            "_PATIENT_INFO_": Config.PATIENT_INFO,
-            "_GENOTYPING_TABLE_": Config.GENOTYPING_TABLE
-        }
-        for r in replacements:
-            query = query.replace(r, replacements[r])
-        if other is not None:
-            for r in other:
-                query = query.replace(r, other[r])
-        return query
-
-    # Check if a query requires a main query substitution
-    def main_query(self, query_file):
-        if query_file in Queries.MAIN_QUERY:
-            main_query = Queries.MAIN_QUERY[query_file]
-            prepped_main = self.prepare_query(main_query)
-            return prepped_main
-        return None
-
-    def custom_cutoffs(self, query_file):
-        cutoffs = None
-        # Check if this query requires cutoffs to be defined by average values
-        if query_file in Queries.AVERAGE_STDDEV:
-            prequery = Queries.AVERAGE_STDDEV[query_file]
-            logging.debug("Prequery required: %s" % prequery)
-            cutoffs = self.average_stddev_cutoffs(prequery)
-        if query_file in Queries.CUTOFF:
-            prequery = Queries.CUTOFF[query_file]
-            logging.debug("Prequery required: %s" % prequery)
-            cutoffs = self.cutoff(prequery)
-        return cutoffs
-
-    # Get preset cutoffs from query file
-    def get_preset_cutoffs(self, query):
-        cutoffs = None
-        if query in Queries.PRESET_CUTOFFS:
-            cutoffs = Queries.PRESET_CUTOFFS[query]
-        return cutoffs
-
-    # Get cutoff from prequery
-    def cutoff(self, query_file):
-        logging.debug("Getting cutoff")
-        query = self.prepare_query(query_file)
-        query_name = self.query_name(query_file)
-        result = self.bq.run(query, query_name=query_name)
-        for r in result:
-            cutoff = r['cutoff']
-            substitution = {"_CUTOFF_": cutoff}
-            return substitution
-
-    # Run metrics query to define cutoffs based on average and standard deviation values
-    def average_stddev_cutoffs(self, query_file):
-        logging.debug("Getting average and standard deviation")
-        query = self.prepare_query(query_file)
-        query_name = self.query_name(query_file)
-        result = self.bq.run(query, query_name=query_name)
-        average, stddev = self.get_average_stddev(result)
-        logging.debug("Average: %s, Standard Deviation: %s" % (average, stddev))
-        max, min = self.calculate_max_min(average, stddev)
-        logging.debug("Max: %s, Min: %s" % (max, min))
-        substitutions = self.create_max_min_substitutions(max, min)
-        return substitutions
-
-    # Get average and standard deviation values from a parsed BigQuery result
-    def get_average_stddev(self, result):
-        for r in result:
-            average = r['average']
-            stddev = r['stddev']
-            return average, stddev
-
-    # Calculate maximum and minimum values based on average and standard deviation.
-    # Cutoffs are defined as more than three standard deviations away from the average.
-    def calculate_max_min(self, average, stddev):
-        max = float(average) + (3 * float(stddev))
-        min = float(average) - (3 * float(stddev))
-        return max, min
-
-    # Create maximum and minimum cutoff dictionary
-    def create_max_min_substitutions(self, max, min):
-        dict = {
-            "_MAX_VALUE_": "%s" % max,
-            "_MIN_VALUE_": "%s" % min,
-        }
-        return dict
-
-    #### Functions to accumulate failures ####
-    # Get failed sample ids
-    def get_failed_samples(self, result):
-        if result:
-            failed_ids = []
-            for r in result:
-                failed_ids.append(r['sample_id'])
-            return failed_ids
-        return None
-
-    # Get failed positions
-    def get_failed_positions(self, result):
-        if result:
-            failed_positions = []
-            for r in result:
-                position = {
-                    "chr": r['reference_name'],
-                    "start": r['start'],
-                    "end": r['end']
-                }
-                failed_positions.append(position)
-            return failed_positions
-        return None
-
-    # Add failed samples to total
-    def collect_failed_samples(self, result, query):
-        logging.debug("Collecting failed samples.")
-        query_name = self.query_name(query)
-        if result is None:
-            return
-        for r in result:
-            sample_id = r['sample_id']
-            if sample_id in self.failed_samples:
-                self.failed_samples[sample_id].append(query_name)
-            else:
-                self.failed_samples[sample_id] = [query_name]
-
-    # Add failed positions to total
-    def collect_failed_positions(self, result, query):
-        logging.debug("Collecting failed positions.")
-        if result is None:
-            return
-        for r in result:
-            position = "/".join([r['reference_name'], r['start'], r['end']])
-            if position in self.failed_positions:
-                self.failed_positions[position].append(query)
-            else:
-                self.failed_positions[position] = [query]
-
-    # Add failed sample calls to total
-    def collect_failed_sample_calls(self, result, query):
-        logging.debug("Collecting failed calls.")
-        if result is None:
-            return
-        for r in result:
-            position = "/".join([r['sample_id'], r['reference_name'], r['start'], r['end']])
-            if position in self.failed_sample_calls:
-                self.failed_sample_calls[position].append(query)
-            else:
-                self.failed_sample_calls[position] = [query]
+    # Execute a custom list of queries
+    def custom_list(self, qc_list):
+        for s in qc_list:
+            try:
+                method = getattr(self.queries, s)
+                result = method()
+                print json.dumps(result, sort_keys=True, indent=2)
+            except Exception as e:
+                print "%s not a valid qc method!" % s
 
     #### Functions for removing based on provided files ####
     def remove_samples_from_file(self, file):
@@ -377,6 +181,7 @@ class GenomicsQC(object):
         logging.basicConfig(filename='genomics-qc.%s.log' % self.date,
                             format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s', level=log_level)
 
+    # Check for job status given a set of BigQuery ids
     def poll_jobs(self, ids):
         print "Waiting for all queries to complete"
         for query in ids:
@@ -387,3 +192,402 @@ class GenomicsQC(object):
             if result != 'DONE':
                 print "Query failed: %s %s" % (query, result)
         logging.debug("Polling complete")
+
+'''
+QCSteps Class
+
+Self contained functions for executing QC queries on BigQuery.  Individual queries can be executed as well as all
+sample level or variant level qcs.
+'''
+class QCSteps(object):
+    def __init__(self, verbose=False, client_secrets=None, project_number=None, dataset=None, variant_table=None,
+                 expanded_table=None):
+
+        # Set global variables
+        self.query_repo = Config.QUERY_REPO
+        if variant_table is None:
+            variant_table = Config.VARIANT_TABLE
+        self.variant_table = variant_table
+
+        if expanded_table is None:
+            expanded_table = Config.EXPANDED_TABLE
+        self.expanded_table = expanded_table
+
+        if client_secrets is None:
+            client_secrets = Config.CLIENT_SECRETS
+        self.client_secrets_path = client_secrets
+
+        if project_number is None:
+            project_number = Config.PROJECT_NUMBER
+        self.project_number = project_number
+
+        if dataset is None:
+            dataset = Config.DATASET
+        self.dataset = dataset
+
+        qc_dataset = Config.QC_DATASET
+        project_name = Config.PROJECT_NAME
+
+        # Set up API clients
+        self.bq = BigQuery(project_number=self.project_number,
+                           client_secrets=self.client_secrets_path,
+                           project_name=project_name,
+                           qc_dataset=qc_dataset)
+
+        self.gg = GoogleGenomicsClient(client_secrets=self.client_secrets_path,
+                                       project_number=self.project_number,
+                                       dataset=self.dataset)
+
+        self.failed_samples = {}
+
+    '''
+    Execute all sample level qc steps
+    A dictionary containing the ids of samples failing any qc steps and the qcs they failed will be returned
+    '''
+    def sample_level_qc(self):
+        self.__collect_failed_samples(self.gender_check(), "gender_check")
+        #self.__collect_failed_samples(self.genotyping_concordance(), "genotype_concordance")
+        self.__collect_failed_samples(self.heterozygosity_rate(), "heterozygosity_rate")
+        self.__collect_failed_samples(self.inbreeding_coefficient(), "inbreeding_coefficient")
+        self.__collect_failed_samples(self.missingness_rate(), "missingness_rate")
+        self.__collect_failed_samples(self.singletons(), "private_variants")
+        return self.failed_samples
+
+    '''
+    Execute all variant level qc steps
+    As some of these queries can return very large results they are output to a table by default.
+    A list of job ids is returned that can be used to check the query status.
+    '''
+    def variant_level_qc(self, save_to_table=True):
+        ids = {}
+        ids["blacklisted"] = self.blacklisted(save_to_table)
+        ids["hardy_weinberg"] = self.hardy_weinberg(save_to_table)
+        ids["heterozygous_haplotype"] = self.heterozygous_haplotype(save_to_table)
+        ids["titv_by_alts"] = self.titv_by_alternate_allele_counts(save_to_table)
+        ids["titv_by_depth"] = self.titv_by_depth(save_to_table)
+        ids["titv_by_genomic_window"] = self.titv_by_genomic_window(save_to_table)
+        return ids
+
+    '''
+    SAMPLE LEVEL QC Queries
+    '''
+
+    '''
+    Gender Check
+
+    Gender is inferred for each genome by calculating the heterozygosity rate on the X chromosome. Genomes who's
+    inferred sex is different from that of the reported sex are removed from the cohort. Although it is possible for
+    people to be genotypically male and phenotypically female, it is more likely that samples and phenotypic records
+    were mislabeled.
+    '''
+    def gender_check(self):
+        print "Running Gender Check"
+        query_file = Queries.GENDER_CHECK
+        query = self.__prepare_query(query_file)
+        return self.bq.run(query, self.__query_name(query_file), False)
+
+    '''
+    Genotyping Concordance
+
+    We next want to look at the concordance between SNPs called from the sequencing data and those called through the
+    use genotyping. This allows us to identify samples that may have been mixed up in the laboratory.  Any genomes
+    with a concordance less than 0.95 are returned
+    '''
+    def genotyping_concordance(self):
+        print "Running Genotype Concordance"
+        query_file = Queries.GENOTYPING_CONCORDANCE
+        query = self.__prepare_query(query_file)
+        return self.bq.run(query, self.__query_name(query_file), False)
+
+    '''
+    Heterozygosity Rate
+
+    Heterozygosity rate is defined as the number of heterozygous calls in a genome. Genomes with a heterozygosity rate
+    more than 3 standard deviations away from the mean are returned.
+    '''
+    def heterozygosity_rate(self):
+        print "Running Heterozygosity Rate"
+        prequery_file = Queries.HETEROZYGOSITY_METRICS
+        cutoffs = self.__three_sigma_cutoffs(prequery_file)
+        query_file = Queries.HETEROZYGOSITY
+        query = self.__prepare_query(query_file, cutoffs)
+        return self.bq.run(query, self.__query_name(query_file), False)
+
+    '''
+    Inbreeding Coefficient
+
+    The inbreeding coefficient (F) is a measure of expected homozygosity rates vs observed homozygosity rates for
+    individual genomes. Here, we calculate the inbreeding coefficient using the method-of-moments estimator. Genomes
+    with an inbreeding coefficient more than 3 standard deviations away from the mean are removed from the cohort.
+    '''
+    def inbreeding_coefficient(self):
+        print "Running Inbreeding Coefficient"
+        prequery_file = Queries.INBREEDING_COEFFICIENT_METRICS
+        cutoffs = self.__three_sigma_cutoffs(prequery_file)
+        query_file = Queries.INBREEDING_COEFFICIENT
+        query = self.__prepare_query(query_file, cutoffs)
+        return self.bq.run(query, self.__query_name(query_file), False)
+
+    '''
+    Missingness Rate
+
+    Missingess is defined as the proportion of sites found in the reference genome that are not called in a given
+    genome. We calculate the missingness rate of each genome in our cohort in order to identify samples that are
+    potentially low quality. If a sample has a high missingness rate it may be indicative of issues with sample
+    preparation or sequencing. Genomes with a missingness rate greater than 0.1 are returned.
+    '''
+    def missingness_rate(self):
+        print "Running Sample Level Missingness Rate"
+        query_file = Queries.MISSINGNESS_SAMPLE_LEVEL
+        query = self.__prepare_query(query_file)
+        return self.bq.run(query, self.__query_name(query_file), False)
+
+    '''
+    Singleton Rate
+
+    Singleton rate is defined as the number of variants that are unique to a genome. If a variant is found in only one
+    genome in the cohort it is considered a singleton. Genomes with singleton rates more than 3 standard deviations away
+    from the mean are returned.
+    '''
+    def singletons(self):
+        print "Running Private Variants"
+        prequery_file = Queries.PRIVATE_VARIANT_METRICS
+        cutoffs = self.__three_sigma_cutoffs(prequery_file)
+        query_file = Queries.PRIVATE_VARIANTS
+        query = self.__prepare_query(query_file, cutoffs)
+        return self.bq.run(query, self.__query_name(query_file), False)
+
+
+    '''
+    VARIANT LEVEL QC
+
+    By default all output is directed to a BigQuery table as the results may be very large.
+    '''
+    '''
+    Blacklisted Variants
+
+    Identify all variants within our cohort that have been blacklisted. For more information on what variants are
+    blacklisted and why see here: https://sites.google.com/site/anshulkundaje/projects/blacklists
+
+    By default all output is directed to a BigQuery table as the results may be very large.  Output is directed to
+    qc_tables.blacklisted_variants
+    '''
+    def blacklisted(self, save_to_table=False):
+        print "Running Blacklisted"
+        query_file = Queries.BLACKLISTED
+        query = self.__prepare_query(query_file)
+        return self.bq.run(query, self.__query_name(query_file), save_to_table)
+
+    '''
+    Hardy-Weinberg Equilibrium
+
+    For each variant, compute the expected versus observed relationship between allele frequencies and genotype
+    frequencies per the Hardy-Weinberg Equilibrium.
+
+    By default all output is directed to a BigQuery table as the results may be very large.  Output is directed to
+    qc_tables.hwe_fail
+    '''
+    def hardy_weinberg(self, save_to_table=False):
+        print "Running Hardy-Weinberg Equilibrium"
+        prequery_file = Queries.HARDY_WEINBERG_METRICS
+        cutoffs = self.__cutoff(prequery_file)
+        query_file = Queries.HARDY_WEINBERG
+        query = self.__prepare_query(query_file, cutoffs)
+        return self.bq.run(query, self.__query_name(query_file), save_to_table)
+
+    '''
+    Heterozygous Haplotype
+
+    For each variant within the X and Y chromosome, identify heterozygous variants in male genomes.  All positions
+    with heterozygous positions outside the pseudo autosomal regions in male genomes are returned.
+
+    By default all output is directed to a BigQuery table as the results may be very large.  Output is directed to
+    qc_tables.sex_chromosome_heterozygous_haplotypes
+    '''
+    def heterozygous_haplotype(self, save_to_table=False):
+        print "Running Heterozygous Haplotype"
+        query_file = Queries.HETERZYGOUS_HAPLOTYPE
+        query = self.__prepare_query(query_file)
+        return self.bq.run(query, self.__query_name(query_file), save_to_table)
+
+    '''
+    Variant Level Missingness
+
+    For each variant, compute the missingness rate. This query can be used to identify variants with a poor call rate.
+
+    By default all output is directed to a BigQuery table as the results may be very large.  Output is directed to
+    qc_tables.variant_level_missingness_fail
+    '''
+    def missingness_variant_level(self, save_to_table=False):
+        print "Running Variant Level Missingness"
+        query_file = Queries.MISSINGNESS_VARIANT_LEVEL
+        query = self.__prepare_query(query_file)
+        return self.bq.run(query, self.__query_name(query_file), save_to_table)
+
+    '''
+    Ti/Tv By Alternate Allele Counts
+
+    Check whether the ratio of transitions vs. transversions in SNPs appears to be resonable across the range of rare
+    variants to common variants. This query may help to identify problems with rare or common variants.
+
+    By default all output is directed to a BigQuery table as the results may be very large.  Output is directed to
+    qc_tables.titv_alternate_alleles
+    '''
+    def titv_by_alternate_allele_counts(self, save_to_table=False):
+        print "Running Ti/Tv By Alternate Allele Counts"
+        #todo
+        return
+
+    '''
+    Ti/Tv By Depth
+
+    Check whether the ratio of transitions vs. transversions in SNPs is within a set range at each sequencing depth for
+    each sample.
+
+    By default all output is directed to a BigQuery table as the results may be very large.  Output is directed to
+    qc_tables.titv_by_depth_fail
+    '''
+    def titv_by_depth(self, save_to_table=False):
+        print "Running Ti/Tv By Depth"
+        query_file = Queries.TITV_DEPTH
+        query = self.__prepare_query(query_file)
+        return self.bq.run(query, self.__query_name(query_file), save_to_table)
+
+    '''
+    Ti/Tv By Genomic Window
+
+    Check whether the ratio of transitions vs. transversions in SNPs appears to be reasonable in each window of genomic
+    positions. This query may help identify problematic regions.
+
+    By default all output is directed to a BigQuery table as the results may be very large.  Output is directed to
+    qc_tables.titv_by_genomic_window_fail
+    '''
+    def titv_by_genomic_window(self, save_to_table=False):
+        print "Running Ti/Tv By Genomic Window"
+        query_file = Queries.TITV_GENOMIC_WINDOW
+        return self.bq.run(query, self.__query_name(query_file), save_to_table)
+
+    '''
+    Private functions used to prepare queries for execution
+    '''
+    # Set up the query, read it in, apply substitutions
+    def __prepare_query(self, query_file, cutoffs={}):
+        logging.debug("Preparing query: %s" % query_file)
+        raw_query = self.__get_query(query_file)
+        all_subs = {}
+        presets = self.__get_preset_cutoffs(query_file)
+        all_subs.update(presets)
+        all_subs.update(cutoffs)
+        if query_file in Queries.MAIN_QUERY:
+            main_query = Queries.MAIN_QUERY[query_file]
+            main = self.__prepare_query(main_query)
+            all_subs['_MAIN_QUERY_'] = main
+        query = self.__query_substitutions(raw_query, other=all_subs)
+        return query
+
+    # Recursively substitute placeholders in each query.  Recursion is required because in some cases items that
+    # substituted also contain placeholders.
+    def __query_substitutions(self, query, other=None):
+        replacements = {
+            "_THE_TABLE_": Config.VARIANT_TABLE,
+            "_THE_EXPANDED_TABLE_": Config.EXPANDED_TABLE,
+            "_PATIENT_INFO_": Config.PATIENT_INFO,
+            "_GENOTYPING_TABLE_": Config.GENOTYPING_TABLE
+        }
+        replacements.update(other)
+        count = 0
+        for r in replacements:
+            count += query.count(r)
+        if (count == 0):
+            return query
+        for r in replacements:
+            query = query.replace(r, replacements[r])
+        # Recursively make substitutions
+        return self.__query_substitutions(query, other)
+
+    # Check if a query requires a main query substitution
+    def __main_query(self, query_file):
+        if query_file in Queries.MAIN_QUERY:
+            main_query = Queries.MAIN_QUERY[query_file]
+            prepped_main = self.prepare_query(main_query)
+            return prepped_main
+        return None
+
+    # Read raw query in from file
+    def __get_query(self, file):
+        path = os.path.join(self.query_repo, file)
+        query = ''
+        with open (path, "r") as f:
+            query = f.read()
+        return query
+
+    # Get the base name of the query file and make some replacements
+    def __query_name(self, query_file):
+        query_name = query_file.split('.')[0]
+        query_name = query_name.replace("-", "_")
+        return query_name
+
+    # Get preset cutoffs from query file
+    def __get_preset_cutoffs(self, query):
+        cutoffs = {}
+        if query in Queries.PRESET_CUTOFFS:
+            cutoffs = Queries.PRESET_CUTOFFS[query]
+        return cutoffs
+
+    # Determine cutoffs for methods that require cutoffs set at three standard deviations from the mean
+    def __three_sigma_cutoffs(self, query_file):
+        logging.debug("Getting average and standard deviation")
+        query = self.__prepare_query(query_file)
+        query_name = self.__query_name(query_file)
+        result = self.bq.run(query, query_name=query_name)
+        average, stddev = self.__get_average_stddev(result)
+        logging.debug("Average: %s, Standard Deviation: %s" % (average, stddev))
+        max, min = self.__calculate_max_min(average, stddev)
+        logging.debug("Max: %s, Min: %s" % (max, min))
+        substitutions = self.__create_max_min_substitutions(max, min)
+        return substitutions
+
+    # Get the average and standard deviation from a query result
+    def __get_average_stddev(self, result):
+        for r in result:
+            average = r['average']
+            stddev = r['stddev']
+            return average, stddev
+
+    # Calculate the 3 sigma rule given an average and standard deviation
+    def __calculate_max_min(self, average, stddev):
+        max = float(average) + (3 * float(stddev))
+        min = float(average) - (3 * float(stddev))
+        return max, min
+
+    # Create a dictionary of substitutions given a max and min
+    def __create_max_min_substitutions(self, max, min):
+        dict = {
+            "_MAX_VALUE_": "%s" % max,
+            "_MIN_VALUE_": "%s" % min,
+        }
+        return dict
+
+    # Get cutoff from prequery
+    def __cutoff(self, query_file):
+        logging.debug("Getting cutoff")
+        query = self.__prepare_query(query_file)
+        query_name = self.__query_name(query_file)
+        result = self.bq.run(query, query_name=query_name)
+        for r in result:
+            cutoff = r['cutoff']
+            substitution = {"_CUTOFF_": cutoff}
+            return substitution
+        return {}
+
+    # Add failed samples to total
+    def __collect_failed_samples(self, result, query):
+        logging.debug("Collecting failed samples.")
+        if result is None:
+            return
+        for r in result:
+            sample_id = r['sample_id']
+            if sample_id in self.failed_samples:
+                self.failed_samples[sample_id].append(query)
+            else:
+                self.failed_samples[sample_id] = [query]
