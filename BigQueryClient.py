@@ -5,6 +5,7 @@ from oauth2client.file import Storage
 from oauth2client import tools
 import logging
 from time import sleep
+import json
 
 class BigQueryClient(object):
     def __init__(self, client_secrets):
@@ -47,7 +48,6 @@ class BigQuery(object):
                 return job_id
             else:
                 return False
-
         result = self.parse_bq_response(response)
         return result
 

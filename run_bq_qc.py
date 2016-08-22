@@ -35,8 +35,6 @@ def parse_command_line():
                                      "titv_by_depth, titv_by_genomic_window.")
     parser.add_argument("--remove-samples", action='store_true', default=False,
                                 help="Remove samples from dataset.")
-    parser.add_argument("--wait_for_completion", action='store_true', default=False,
-                                help="Wait for completion of queries before exiting. Only applicable for variant qc")
     parser.add_argument("--variant_table", default=None,
                                 help="OPTIONAL. Variant table to query. Defaults to value in config.py")
     parser.add_argument("--expanded_table", default=None,
@@ -50,6 +48,8 @@ def parse_command_line():
     parser.add_argument("--verbose", action='store_true', default=False,
                                 help="OPTIONAL. Logs will be very detailed. Kind of noise regardless thanks to Google"
                                      "API Client.")
+    parser.add_argument("--poll", action='store_true', default=False,
+                                help="OPTIONAL. Wait for submitted jobs to finish.  Only applies to variant qc.")
 
     options = parser.parse_args()
     if options.sample_qc is False and options.variant_qc is False and options.qc is None:
@@ -63,4 +63,4 @@ if __name__ == "__main__":
     RunQC(sample_level=options.sample_qc, variant_level=options.variant_qc, verbose=options.verbose,
           client_secrets=options.client_secrets, project_number=options.project_number, dataset=options.dataset,
           variant_table=options.variant_table, expanded_table=options.expanded_table,
-          remove_samples=options.remove_samples, poll=options.wait_for_completion, qc_step=options.qc)
+          remove_samples=options.remove_samples, poll=options.poll, qc_step=options.qc)

@@ -45,3 +45,23 @@ DisplayAndDispatchQuery <- function(queryUri, project, replacements=list(), outp
   # Dispatch the query to BigQuery.
   query_exec(querySql, project, destination_table=outputTable)
 }
+
+PrepareSubQuery <- function(queryUri, replacements=list()) {
+  if (missing(queryUri)) {
+    stop("Pass the file path or url to the file containing the query.")
+  }
+  
+  if (grepl("^https.*", queryUri)) {
+    # Read the query from a remote location.
+    querySql <- getURL(queryUri, ssl.verifypeer=FALSE)
+  } else {
+    # Read the query from the local filesystem.
+    querySql <- readChar(queryUri, nchars=1e6)
+  }
+  
+  # If applicable, substitute values in the query template.
+  for(replacement in names(replacements)) {
+    querySql <- gsub(replacement, replacements[[replacement]], querySql, fixed=TRUE)
+  }
+  return(querySql)
+}

@@ -93,10 +93,41 @@ class GoogleGenomicsClient(object):
         #response = self.execute(request)
         #print response
 
-    def execute(self, request):
+    def execute(self, request, retry=0):
         try:
             response = request.execute()
+            if response is None and retry > 0:
+                print "Request failed.  Retrying. %s" % request
+                self.execute(request, retry-1)
             return response
         except Exception as e:
             logging.error("Request failed: %s" % e)
 
+
+    def coverage_buckets(self, read_group, reference_name=None, start=None, end=None, ):
+        request = self.service.readgroupsets().coveragebuckets().list(
+            readGroupSetId=read_group,
+            range_referenceName=reference_name,
+            range_start=start,
+            range_end=end,
+        )
+        response = self.execute(request, retry=2)
+        #coverages = []
+        if response is None:
+            return None
+        if "coverageBuckets" in response:
+            return response["coverageBuckets"]
+        return None
+
+    def get_read_groups(self, dataset=None, sample_id=None):
+        if dataset is None:
+            dataset = self.dataset
+        request = self.service.readgroupsets().search(
+            body={'datasetIds': [dataset]}
+        )
+        response = self.execute(request)
+        read_groups = []
+        if "readGroupSets" in response:
+            for field in response["readGroupSets"]:
+                read_groups.append(field["id"])
+        return read_groups

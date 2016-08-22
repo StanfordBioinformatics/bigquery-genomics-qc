@@ -62,13 +62,13 @@ class GenomicsQC(object):
         logging.info("Running Sample Level QC")
         failed_samples = self.queries.sample_level_qc()
         if remove is True:
-            self.remove_failed_samples(self.failed_samples)
+            self.remove_failed_samples(failed_samples)
         self.print_removed(failed_samples, 'samples')
 
     # Variant level QC
     def variant_qc(self, poll=False):
         logging.info("Running Variant Level QC")
-        self.queries.variant_level_qc()
+        job_ids = self.queries.variant_level_qc()
         if poll is True:
             logging.debug("Waiting for query completion")
             self.poll_jobs(job_ids)
@@ -261,11 +261,11 @@ class QCSteps(object):
     def variant_level_qc(self, save_to_table=True):
         ids = {}
         ids["blacklisted"] = self.blacklisted(save_to_table)
-        ids["hardy_weinberg"] = self.hardy_weinberg(save_to_table)
+        #ids["hardy_weinberg"] = self.hardy_weinberg(save_to_table)
         ids["heterozygous_haplotype"] = self.heterozygous_haplotype(save_to_table)
-        ids["titv_by_alts"] = self.titv_by_alternate_allele_counts(save_to_table)
-        ids["titv_by_depth"] = self.titv_by_depth(save_to_table)
-        ids["titv_by_genomic_window"] = self.titv_by_genomic_window(save_to_table)
+        #ids["titv_by_alts"] = self.titv_by_alternate_allele_counts(save_to_table)
+        #ids["titv_by_depth"] = self.titv_by_depth(save_to_table)
+        #ids["titv_by_genomic_window"] = self.titv_by_genomic_window(save_to_table)
         return ids
 
     '''
@@ -465,6 +465,7 @@ class QCSteps(object):
     def titv_by_genomic_window(self, save_to_table=False):
         print "Running Ti/Tv By Genomic Window"
         query_file = Queries.TITV_GENOMIC_WINDOW
+        query = self.__prepare_query(query_file)
         return self.bq.run(query, self.__query_name(query_file), save_to_table)
 
     '''
