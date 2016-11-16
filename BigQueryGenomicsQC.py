@@ -13,6 +13,8 @@ class GenomicsQC(object):
     def __init__(self, verbose=False, client_secrets=None, project_number=None, dataset=None, variant_table=None,
                  expanded_table=None):
 
+
+
         # Set global variables
         self.query_repo = Config.QUERY_REPO
         if variant_table is None:
@@ -55,6 +57,8 @@ class GenomicsQC(object):
         self.queries = QCSteps(verbose=verbose, client_secrets=self.client_secrets_path,
                                project_number=self.project_number, dataset=self.dataset,
                                variant_table=self.variant_table, expanded_table=self.expanded_table)
+
+
 
     #### Specific types of QC functions ####
     # Sample level QC
@@ -261,8 +265,9 @@ class QCSteps(object):
     def variant_level_qc(self, save_to_table=True):
         ids = {}
         ids["blacklisted"] = self.blacklisted(save_to_table)
-        #ids["hardy_weinberg"] = self.hardy_weinberg(save_to_table)
+        ids["hardy_weinberg"] = self.hardy_weinberg(save_to_table)
         ids["heterozygous_haplotype"] = self.heterozygous_haplotype(save_to_table)
+        ids["variant_missingness"] = self.missingness_variant_level(save_to_table)
         #ids["titv_by_alts"] = self.titv_by_alternate_allele_counts(save_to_table)
         #ids["titv_by_depth"] = self.titv_by_depth(save_to_table)
         #ids["titv_by_genomic_window"] = self.titv_by_genomic_window(save_to_table)
@@ -393,6 +398,7 @@ class QCSteps(object):
         cutoffs = self.__cutoff(prequery_file)
         query_file = Queries.HARDY_WEINBERG
         query = self.__prepare_query(query_file, cutoffs)
+        print query
         return self.bq.run(query, self.__query_name(query_file), save_to_table)
 
     '''
@@ -479,11 +485,15 @@ class QCSteps(object):
         presets = self.__get_preset_cutoffs(query_file)
         all_subs.update(presets)
         all_subs.update(cutoffs)
+        #print Queries.MAIN_QUERY
         if query_file in Queries.MAIN_QUERY:
             main_query = Queries.MAIN_QUERY[query_file]
+            #print main_query
             main = self.__prepare_query(main_query)
+            #print main
             all_subs['_MAIN_QUERY_'] = main
         query = self.__query_substitutions(raw_query, other=all_subs)
+        #print all_subs
         return query
 
     # Recursively substitute placeholders in each query.  Recursion is required because in some cases items that
@@ -573,6 +583,7 @@ class QCSteps(object):
     def __cutoff(self, query_file):
         logging.debug("Getting cutoff")
         query = self.__prepare_query(query_file)
+        #print query
         query_name = self.__query_name(query_file)
         result = self.bq.run(query, query_name=query_name)
         for r in result:

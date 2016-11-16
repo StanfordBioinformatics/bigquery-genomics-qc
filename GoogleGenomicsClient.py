@@ -8,6 +8,7 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow
 import logging
+from argparse import Namespace
 
 class GoogleGenomicsClient(object):
     def __init__(self, client_secrets, project_number, dataset):
@@ -29,15 +30,22 @@ class GoogleGenomicsClient(object):
                 'one exists. See the README for more help.')
 
             # There's probably a better way to generate the 'flags' object.  Doing it this way for now.
-            parser = argparse.ArgumentParser(description=__doc__,
-                formatter_class=argparse.RawDescriptionHelpFormatter,
-                parents=[tools.argparser])
-            parser.add_argument('--client_secrets_filename',
-                default=client_secrets,
-                help='The filename of a client_secrets.json file from a '
-                     'Google "Client ID for native application" that '
-                     'has the Genomics API enabled.')
-            flags = parser.parse_args()
+            #parser2 = argparse.ArgumentParser(description=__doc__,
+            #    formatter_class=argparse.RawDescriptionHelpFormatter,
+            #    parents=[tools.argparser])
+            #print parser2
+            #parse2 = parser2.parse_args()
+            #print parse2
+            #parser2.add_argument('--client_secrets_filename',
+            #    default=client_secrets,
+            #    help='The filename of a client_secrets.json file from a '
+            #         'Google "Client ID for native application" that '
+            #         'has the Genomics API enabled.')
+
+            flags = Namespace(client_secrets_filename=client_secrets, logging_level='INFO', auth_host_name='localhost',
+                              auth_host_port=[8080, 8090], noauth_local_webserver=False)
+
+            #flags = parser2.parse_args()
 
             credentials = run_flow(flow, storage, flags)
             # Create a genomics API service

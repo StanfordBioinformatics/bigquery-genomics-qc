@@ -7,6 +7,7 @@ from BigQueryGenomicsQC import QCSteps
 def RunQC(verbose= False, sample_level=False, remove_samples=False, variant_level=False, client_secrets=None, project_number=None,
           dataset=None, variant_table=None, expanded_table=None, poll=False, qc_step=None):
 
+
     qc = GenomicsQC(verbose=verbose, client_secrets=client_secrets, project_number=project_number, dataset=dataset,
                     variant_table=variant_table, expanded_table=expanded_table)
 
@@ -52,6 +53,7 @@ def parse_command_line():
                                 help="OPTIONAL. Wait for submitted jobs to finish.  Only applies to variant qc.")
 
     options = parser.parse_args()
+
     if options.sample_qc is False and options.variant_qc is False and options.qc is None:
         print "Exiting, no qc specified.\nSpecify sample qc, variant qc, or both.\n--sample_qc and/or --variant_qc." \
               "Individual QC steps can be run using --qc"

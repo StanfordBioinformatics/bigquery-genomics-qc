@@ -36,6 +36,8 @@ class BigQuery(object):
         self.qc_dataset = qc_dataset
 
     def run(self, query, query_name, table_output=False):
+        #print query_name
+        #print query
         logging.debug("Querying BigQuery")
         logging.debug(query)
         response = self.execute_query(query, query_name, table_output)
