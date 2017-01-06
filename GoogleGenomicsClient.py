@@ -51,7 +51,7 @@ class GoogleGenomicsClient(object):
             # Create a genomics API service
         http = httplib2.Http()
         http = credentials.authorize(http)
-        service = build('genomics', 'v1beta2', http=http)
+        service = build('genomics', 'v1', http=http)
         return service
 
     def list_datasets(self):
