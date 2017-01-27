@@ -249,7 +249,7 @@ class QCSteps(object):
     A dictionary containing the ids of samples failing any qc steps and the qcs they failed will be returned
     '''
     def sample_level_qc(self):
-        self.__collect_failed_samples(self.gender_check(), "gender_check")
+        #self.__collect_failed_samples(self.gender_check(), "gender_check")
         #self.__collect_failed_samples(self.genotyping_concordance(), "genotype_concordance")
         self.__collect_failed_samples(self.heterozygosity_rate(), "heterozygosity_rate")
         self.__collect_failed_samples(self.inbreeding_coefficient(), "inbreeding_coefficient")
